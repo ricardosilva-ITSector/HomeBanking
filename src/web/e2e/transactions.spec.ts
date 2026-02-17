@@ -27,9 +27,11 @@ test.describe('Transactions', () => {
     const rowCount = await transactionRows.count();
     expect(rowCount).toBeGreaterThan(0);
 
-    // Verify category badges are visible
-    const categoryBadges = page.locator('[data-testid="category-badge"], .badge, [class*="badge"]');
-    await expect(categoryBadges.first()).toBeVisible();
+    // Verify category values are present in the Category column (3rd column in tbody)
+    // Categories are rendered as badges with text content
+    const firstCategoryCell = page.locator('table tbody tr:first-child td:nth-child(3)');
+    await expect(firstCategoryCell).toBeVisible();
+    await expect(firstCategoryCell).not.toBeEmpty();
 
     // Take screenshot
     await page.screenshot({ path: 'test-results/transactions.png', fullPage: true });
