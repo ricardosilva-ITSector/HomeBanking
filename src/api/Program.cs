@@ -1,3 +1,6 @@
+using HomeBanking.Api.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add CORS configuration
@@ -15,6 +18,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Add DbContext with InMemory provider
+builder.Services.AddDbContext<HomeBankingDbContext>(options =>
+    options.UseInMemoryDatabase("HomeBankingDb"));
+
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -24,6 +31,14 @@ builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
+
+// Seed the database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<HomeBankingDbContext>();
+    SeedData.Initialize(context);
+}
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
