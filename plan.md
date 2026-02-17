@@ -328,8 +328,9 @@ A task achieves "DONE" status when:
     - TypeScript 5.9.3 scaffolded (close to spec's 5.7+)
     - Vite 7.3.1 scaffolded (newer than spec's 6.0+, compatible)
     - npm install required after Vite create (dependencies partially installed)
-  - Commit: (pending)
-  - CI Status: (pending - will be verified after commit)
+    - .gitignore created at root level for monorepo
+  - Commit: 7737c0c
+  - CI Status: (not yet pushed to remote)
 
 ---
 
