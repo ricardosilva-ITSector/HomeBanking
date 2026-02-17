@@ -367,23 +367,35 @@ A task achieves "DONE" status when:
 ## Phase 2: Backend API
 
 ### Task T002: Create .NET Core 9 API Project
-- **Status**: pending
+- **Status**: completed
 - **Dependencies**: T001
 - **Estimate**: S
 - **Description**: Initialize ASP.NET Core 9 Web API project with essential configuration
 - **DoD**:
-  - [ ] `dotnet new webapi` in src/api/HomeBanking.Api
-  - [ ] Project references .NET 9.0 SDK
-  - [ ] Nullable reference types enabled
-  - [ ] CORS configured for localhost:5173 (Vite default)
-  - [ ] appsettings.json and appsettings.Development.json configured
-  - [ ] Builds without warnings
-  - [ ] No lint errors (Roslyn analyzers)
-  - [ ] New tests: N/A
-  - [ ] All tests pass: N/A
-  - [ ] Docs updated: N/A
-  - [ ] Committed with message: "feat(api): initialize .NET Core 9 Web API project"
-- **Plan Changes**: _(filled post-completion)_
+  - [x] `dotnet new webapi` in src/api/HomeBanking.Api
+  - [x] Project references .NET 9.0 SDK
+  - [x] Nullable reference types enabled
+  - [x] CORS configured for localhost:5173 (Vite default)
+  - [x] appsettings.json and appsettings.Development.json configured
+  - [x] Builds without warnings
+  - [x] No lint errors (Roslyn analyzers)
+  - [x] New tests: N/A
+  - [x] All tests pass: N/A
+  - [x] Docs updated: N/A
+  - [x] Committed with message: "feat(api): initialize .NET Core 9 Web API project"
+- **Plan Changes**: 
+  - Completed: Feb 17 2026, ~45min (estimated 1-2h)
+  - Downstream impacts:
+    - None (configuration baseline established for subsequent API tasks)
+  - Learnings:
+    - Configured CORS for localhost:5173 (Vite) with credentials support
+    - Added comprehensive .editorconfig with .NET best practices
+    - Enabled Roslyn analyzers (EnforceCodeStyleInBuild, AnalysisLevel=latest)
+    - Created folder structure (Controllers/, Models/, Data/, Services/, Validators/)
+    - Added health check endpoint at /health
+    - Removed WeatherForecast template code
+  - Commit: 5ada63f
+  - CI Status: N/A (CI workflow not yet configured - will be added in T022)
 
 ---
 
