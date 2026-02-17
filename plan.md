@@ -400,23 +400,33 @@ A task achieves "DONE" status when:
 ---
 
 ### Task T003: Implement Domain Models
-- **Status**: pending
+- **Status**: completed
 - **Dependencies**: T002
 - **Estimate**: S
 - **Description**: Create Account and Transaction entities with enums
 - **DoD**:
-  - [ ] Account.cs model created (Id, AccountNumber, AccountName, Type, Balance, Currency, CreatedAt)
-  - [ ] Transaction.cs model created (Id, AccountId, Date, Description, Amount, Type, Category, BalanceAfter)
-  - [ ] AccountType enum (Checking, Savings)
-  - [ ] TransactionType enum (Debit, Credit)
-  - [ ] Navigation properties configured
-  - [ ] Builds without warnings
-  - [ ] No lint errors
-  - [ ] New tests: N/A (DTOs, no business logic yet)
-  - [ ] All tests pass: N/A
-  - [ ] Docs updated: N/A
-  - [ ] Committed with message: "feat(api): add Account and Transaction domain models"
-- **Plan Changes**: _(filled post-completion)_
+  - [x] Account.cs model created (Id, AccountNumber, AccountName, Type, Balance, Currency, CreatedAt)
+  - [x] Transaction.cs model created (Id, AccountId, Date, Description, Amount, Type, Category, BalanceAfter)
+  - [x] AccountType enum (Checking, Savings)
+  - [x] TransactionType enum (Debit, Credit)
+  - [x] Navigation properties configured
+  - [x] Builds without warnings
+  - [x] No lint errors
+  - [x] New tests: N/A (DTOs, no business logic yet)
+  - [x] All tests pass: N/A
+  - [x] Docs updated: N/A
+  - [x] Committed with message: "feat(api): add Account and Transaction domain models"
+- **Plan Changes**: 
+  - Completed: Feb 17 2026, ~20min (estimated 1-2h)
+  - Downstream impacts:
+    - None (models ready for EF Core configuration in T004)
+  - Learnings:
+    - Used .NET 9 `required` keyword for non-nullable reference types
+    - Added XML documentation comments on all public members
+    - Configured bidirectional navigation properties (Account.Transactions, Transaction.Account)
+    - All models follow C# conventions and nullable reference type best practices
+  - Commit: 9332336
+  - CI Status: N/A (CI workflow not yet configured - will be added in T022)
 
 ---
 
