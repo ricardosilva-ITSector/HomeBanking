@@ -722,24 +722,36 @@ A task achieves "DONE" status when:
 ---
 
 ### Task T012: Complete API Unit Test Coverage
-- **Status**: pending
+- **Status**: completed
 - **Dependencies**: T011, T008
 - **Estimate**: M
 - **Description**: Write comprehensive unit tests for services and controllers
 - **DoD**:
-  - [ ] TransferService tests (all validation rules, success case, edge cases)
-  - [ ] AccountsController tests (GET all accounts)
-  - [ ] TransactionsController tests (filtering, pagination)
-  - [ ] TransfersController tests (success, validation failures)
-  - [ ] Test coverage: 80%+ for business logic
-  - [ ] All tests use proper mocking (Moq for dependencies)
-  - [ ] Builds without warnings
-  - [ ] No lint errors
-  - [ ] New tests: 20+ unit tests
-  - [ ] All tests pass
-  - [ ] Docs updated: N/A
-  - [ ] Committed with message: "test(api): add comprehensive unit test coverage"
-- **Plan Changes**: _(filled post-completion)_
+  - [x] TransferService tests (all validation rules, success case, edge cases)
+  - [x] AccountsController tests (GET all accounts)
+  - [x] TransactionsController tests (filtering, pagination)
+  - [x] TransfersController tests (success, validation failures)
+  - [x] Test coverage: 80%+ for business logic
+  - [x] All tests use proper mocking (Moq for dependencies)
+  - [x] Builds without warnings
+  - [x] No lint errors
+  - [x] New tests: 20+ unit tests
+  - [x] All tests pass
+  - [x] Docs updated: N/A
+  - [x] Committed with message: "test(api): add comprehensive unit test coverage"
+- **Plan Changes**:
+  - **Completion Time**: ~30 min (estimated 2-3h)
+  - **Actual Implementation**:
+    - Created 3 controller test files:
+      - AccountsControllerTests.cs (3 tests): Empty database, seeded data, account details verification
+      - TransactionsControllerTests.cs (9 tests): Pagination, filtering by account, limit/offset combinations, ordering
+      - TransfersControllerTests.cs (8 tests): Success case, all VR-001 to VR-004 validation rules, error handling, service mocking
+    - Enhanced TestDataBuilder with CreateSampleTransactions() utility method
+    - Total: 27 tests (7 TransferService + 3 Accounts + 9 Transactions + 8 Transfers)
+    - All tests use FluentAssertions, Moq, and InMemoryDbContextFactory
+  - **Outcomes**: All 27 tests passing, 0 errors, 0 warnings, comprehensive coverage achieved
+  - **Learnings**: Controller tests require Moq to isolate service dependencies, InMemoryDbContext ideal for data-driven tests
+  - **Commit**: c5a2b3c
 
 ---
 
