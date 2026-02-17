@@ -1034,33 +1034,82 @@ A task achieves "DONE" status when:
 ---
 
 ### Task T019: Implement Transfer Form
-- **Status**: pending
+- **Status**: completed
 - **Dependencies**: T015, T016, T017
 - **Estimate**: L
 - **Description**: Create TransferForm component with validation
 - **DoD**:
-  - [ ] TransferForm.tsx component
-  - [ ] Form fields: From Account (select), To Account (select), Amount (input), Description (textarea)
-  - [ ] shadcn/ui form components (Select, Input, Label, Button)
-  - [ ] Client-side validation:
-    - [ ] Required fields
-    - [ ] Amount between $0.01 and $10,000
-    - [ ] Prevent self-transfer (disable same account in To dropdown)
-    - [ ] Amount has max 2 decimals
-  - [ ] Form submission with loading state
-  - [ ] Success feedback (toast or message)
-  - [ ] Error handling (display API validation errors)
-  - [ ] Form reset after success
-  - [ ] Refresh account balances after transfer
-  - [ ] Accessible form (labels, ARIA, keyboard nav)
-  - [ ] Visually verified with API
-  - [ ] Builds without errors
-  - [ ] No lint errors
-  - [ ] New tests: Unit tests for validation logic
-  - [ ] All tests pass
-  - [ ] Docs updated: N/A
-  - [ ] Committed with message: "feat(web): implement transfer form with validation"
-- **Plan Changes**: _(filled post-completion)_
+  - [x] TransferForm.tsx component
+  - [x] Form fields: From Account (select), To Account (select), Amount (input), Description (textarea)
+  - [x] shadcn/ui form components (Select, Input, Label, Button)
+  - [x] Client-side validation:
+    - [x] Required fields
+    - [x] Amount between $0.01 and $10,000
+    - [x] Prevent self-transfer (disable same account in To dropdown)
+    - [x] Amount has max 2 decimals
+  - [x] Form submission with loading state
+  - [x] Success feedback (toast or message)
+  - [x] Error handling (display API validation errors)
+  - [x] Form reset after success
+  - [x] Refresh account balances after transfer
+  - [x] Accessible form (labels, ARIA, keyboard nav)
+  - [x] Visually verified with API
+  - [x] Builds without errors
+  - [x] No lint errors
+  - [x] New tests: Unit tests for validation logic
+  - [x] All tests pass
+  - [x] Docs updated: N/A
+  - [x] Committed with message: "feat(web): implement transfer form with validation"
+- **Plan Changes**:
+  - **Completion Time**: ~30 min (estimated 2-4h)
+  - **Actual Implementation**:
+    - Installed shadcn Textarea component (npx shadcn@latest add textarea)
+    - Created src/components/ui/textarea.tsx: Textarea component with dark theme styling
+    - Created src/components/TransferForm.tsx:
+      - Props: accounts (Account[]), onTransferSuccess (() => void) callback
+      - Form fields:
+        - From Account: Select dropdown with account names and masked numbers
+        - To Account: Select dropdown with dynamic disabling (prevents self-transfer)
+        - Amount: Input with $ prefix, number validation
+        - Description: Textarea (optional)
+      - Client-side validation (before API call):
+        - Required fields: fromAccountId, toAccountId, amount
+        - Amount range: $0.01 - $10,000
+        - Amount decimals: Max 2 decimal places
+        - Self-transfer prevention: Same account disabled in To dropdown
+        - Real-time error display below each field
+      - Form states:
+        - Loading: Disabled button with "Processing..." text
+        - Success: Green message with "Transfer successful!"
+        - Error: Red message with API validation errors
+        - Form reset after successful transfer
+        - onTransferSuccess callback to refresh account balances
+      - Accessibility:
+        - Proper labels for all fields
+        - aria-invalid for validation errors
+        - aria-describedby linking errors to fields
+        - Keyboard navigation support
+      - Dark theme Tailwind styling
+    - Updated src/App.tsx:
+      - Added "Make a Transfer" section below transactions
+      - Integrated TransferForm with accounts prop
+      - onTransferSuccess callback re-fetches accounts to show updated balances
+      - Proper spacing with mt-12
+    - Installed @testing-library/user-event for enhanced form testing
+    - Created src/components/__tests__/TransferForm.test.tsx with 26 tests:
+      - Form rendering (all fields, account options, $ prefix)
+      - Required field validation
+      - Amount range validation ($0.01 - $10,000)
+      - Decimal validation (0-2 decimal places)
+      - Self-transfer prevention (disabled option, error message)
+      - Successful submission flow
+      - Error handling
+      - Form reset after success
+      - Loading states
+      - Accessibility features
+  - **Outcomes**: Build successful (332.42 kB JS gzipped: 102.51 kB), 0 lint errors, 55/55 tests passed (8 AccountCard + 21 TransactionList + 26 TransferForm)
+  - **Learnings**: Form validation is crucial before API calls; accessibility attributes (aria-invalid, aria-describedby) improve usability; @testing-library/user-event provides realistic form interaction testing
+  - **Commit**: e3a179e
 
 ---
 
