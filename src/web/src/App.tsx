@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Header } from '@/components/Header'
 import { AccountCard } from '@/components/AccountCard'
+import { TransactionList } from '@/components/TransactionList'
 import { getAccounts } from '@/services/api'
 import type { Account } from '@/types/api'
 import './App.css'
@@ -61,6 +62,14 @@ function App() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Recent Transactions Section */}
+        <div className="mt-12 space-y-6">
+          <h2 className="text-2xl font-bold text-slate-100">
+            Recent Transactions
+          </h2>
+          <TransactionList />
         </div>
       </main>
     </div>
