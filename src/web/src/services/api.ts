@@ -6,6 +6,7 @@
 import type {
   Account,
   Transaction,
+  PaginatedTransactionsResponse,
   TransferRequest,
   TransferResponse,
   TransferErrorResponse,
@@ -113,7 +114,8 @@ export async function getTransactions(
     },
   });
 
-  return handleResponse<Transaction[]>(response);
+  const paginatedResponse = await handleResponse<PaginatedTransactionsResponse>(response);
+  return paginatedResponse.transactions;
 }
 
 /**

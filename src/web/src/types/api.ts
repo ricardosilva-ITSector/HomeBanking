@@ -41,6 +41,14 @@ export interface Transaction {
 }
 
 /**
+ * Paginated response DTO for transaction queries.
+ */
+export interface PaginatedTransactionsResponse {
+  totalCount: number;
+  transactions: Transaction[];
+}
+
+/**
  * Request DTO for creating a transfer between accounts.
  */
 export interface TransferRequest {
