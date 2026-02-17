@@ -976,30 +976,60 @@ A task achieves "DONE" status when:
 ---
 
 ### Task T018: Implement Transactions Table
-- **Status**: pending
+- **Status**: completed
 - **Dependencies**: T015, T016
 - **Estimate**: M
 - **Description**: Create TransactionList component with category badges
 - **DoD**:
-  - [ ] TransactionList.tsx component
-  - [ ] Table layout (Date, Description, Category, Amount, Balance)
-  - [ ] Category badges with color coding:
-    - [ ] Income (green): Salary, Refund
-    - [ ] Expense (red): Groceries, Utilities, Entertainment, etc.
-    - [ ] Transfer (blue): Internal Transfer
-  - [ ] Amount formatting (+ for credit, - for debit)
-  - [ ] Date formatting (relative or short date)
-  - [ ] Responsive table (horizontal scroll on mobile)
-  - [ ] Loading and error states
-  - [ ] Fetch transactions on mount
-  - [ ] Visually verified with API
-  - [ ] Builds without errors
-  - [ ] No lint errors
-  - [ ] New tests: Unit test for TransactionList component
-  - [ ] All tests pass
-  - [ ] Docs updated: N/A
-  - [ ] Committed with message: "feat(web): implement transactions table with category badges"
-- **Plan Changes**: _(filled post-completion)_
+  - [x] TransactionList.tsx component
+  - [x] Table layout (Date, Description, Category, Amount, Balance)
+  - [x] Category badges with color coding:
+    - [x] Income (green): Salary, Refund
+    - [x] Expense (red): Groceries, Utilities, Entertainment, etc.
+    - [x] Transfer (blue): Internal Transfer
+  - [x] Amount formatting (+ for credit, - for debit)
+  - [x] Date formatting (relative or short date)
+  - [x] Responsive table (horizontal scroll on mobile)
+  - [x] Loading and error states
+  - [x] Fetch transactions on mount
+  - [x] Visually verified with API
+  - [x] Builds without errors
+  - [x] No lint errors
+  - [x] New tests: Unit test for TransactionList component
+  - [x] All tests pass
+  - [x] Docs updated: N/A
+  - [x] Committed with message: "feat(web): implement transactions table with category badges"
+- **Plan Changes**:
+  - **Completion Time**: ~20 min (estimated 1-2h)
+  - **Actual Implementation**:
+    - Installed shadcn Table component (npx shadcn@latest add table)
+    - Created src/components/ui/table.tsx: Table, TableHeader, TableBody, TableRow, TableHead, TableCell components
+    - Created src/components/TransactionList.tsx:
+      - Props: accountId?: string (optional filter)
+      - Table columns: Date, Description, Category, Amount, Balance After
+      - Category badge color coding with getCategoryVariant() helper:
+        - Income (green): "Salary", "Refund" - default variant with green styling
+        - Expense (red): "Groceries", "Utilities", "Entertainment", "Subscription", "Shopping", "Dining", "Transport" - destructive variant
+        - Transfer (blue): "Internal Transfer" - secondary variant with blue styling
+      - Amount formatting: Credit (+, green text) vs Debit (-, red text) using Intl.NumberFormat
+      - Smart date formatting: Relative time for recent transactions (e.g., "2 hours ago"), formatted date for older ones
+      - Responsive: overflow-x-auto wrapper for horizontal scroll on mobile
+      - Loading state: "Loading transactions..." message
+      - Error state: Error message display with red text
+      - Empty state: "No transactions found" message
+      - useEffect to fetch transactions on mount
+    - Updated src/App.tsx:
+      - Added "Recent Transactions" section below account cards
+      - Proper spacing with mt-12
+    - Created src/components/__tests__/TransactionList.test.tsx with 21 tests:
+      - Rendering states (loading, error, empty, with data)
+      - Table structure and headers
+      - Data formatting (dates, amounts, types)
+      - Visual styling (colors for debits/credits, type badges)
+      - API integration and error handling
+  - **Outcomes**: Build successful (233.29 kB JS, 25.73 kB CSS), 0 lint errors, 29/29 tests passed (8 AccountCard + 21 TransactionList)
+  - **Learnings**: Smart date formatting (relative vs absolute) improves UX; color-coded categories make transactions easy to scan
+  - **Commit**: 6c3f9d4
 
 ---
 
