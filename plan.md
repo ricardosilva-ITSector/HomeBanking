@@ -918,28 +918,60 @@ A task achieves "DONE" status when:
 ## Phase 4: Frontend Features
 
 ### Task T017: Implement Account Balance Cards
-- **Status**: pending
+- **Status**: completed
 - **Dependencies**: T015, T016
 - **Estimate**: M
 - **Description**: Create AccountCard component to display account balances
 - **DoD**:
-  - [ ] AccountCard.tsx component (props: account)
-  - [ ] Display account name, account number (masked), balance, currency
-  - [ ] Styled with shadcn Card component
-  - [ ] Currency formatting (Intl.NumberFormat)
-  - [ ] Account type badge (Checking/Savings)
-  - [ ] Responsive grid layout (1 col mobile, 2 col desktop)
-  - [ ] useEffect to fetch accounts on mount
-  - [ ] Loading state (skeleton or spinner)
-  - [ ] Error handling UI
-  - [ ] Visually verified with API running
-  - [ ] Builds without errors
-  - [ ] No lint errors
-  - [ ] New tests: Vitest unit test for AccountCard component
-  - [ ] All tests pass
-  - [ ] Docs updated: N/A
-  - [ ] Committed with message: "feat(web): implement account balance cards"
-- **Plan Changes**: _(filled post-completion)_
+  - [x] AccountCard.tsx component (props: account)
+  - [x] Display account name, account number (masked), balance, currency
+  - [x] Styled with shadcn Card component
+  - [x] Currency formatting (Intl.NumberFormat)
+  - [x] Account type badge (Checking/Savings)
+  - [x] Responsive grid layout (1 col mobile, 2 col desktop)
+  - [x] useEffect to fetch accounts on mount
+  - [x] Loading state (skeleton or spinner)
+  - [x] Error handling UI
+  - [x] Visually verified with API running
+  - [x] Builds without errors
+  - [x] No lint errors
+  - [x] New tests: Vitest unit test for AccountCard component
+  - [x] All tests pass
+  - [x] Docs updated: N/A
+  - [x] Committed with message: "feat(web): implement account balance cards"
+- **Plan Changes**:
+  - **Completion Time**: ~20 min (estimated 1-2h)
+  - **Actual Implementation**:
+    - Created src/components/ui/badge.tsx: shadcn/ui Badge component with variants (default, secondary, destructive, outline)
+    - Created src/components/AccountCard.tsx:
+      - Props: { account: Account }
+      - Masked account numbers (shows last 4 digits only, e.g., "****1234")
+      - Currency formatting with Intl.NumberFormat (e.g., "$1,234.56")
+      - Account type badges (Checking/Savings) with color coding
+      - Dark theme styling with hover effects
+      - Responsive card design
+    - Updated src/App.tsx:
+      - useState for accounts (Account[]), loading (boolean), error (string | null)
+      - useEffect to fetch accounts on mount using getAccounts()
+      - Loading state: "Loading accounts..." message
+      - Error handling: try/catch with error message display
+      - Responsive grid: grid-cols-1 md:grid-cols-2 with gap-6
+      - Empty state handling
+    - Installed Vitest for testing:
+      - vitest, @testing-library/react, @testing-library/jest-dom, jsdom
+      - Created vitest.config.ts with React testing configuration
+      - Created src/test/setup.ts for test setup
+    - Created src/components/__tests__/AccountCard.test.tsx with 8 tests:
+      - Account name rendering
+      - Masked account number (last 4 digits)
+      - Balance formatting
+      - Account type badges (Checking/Savings)
+      - Different currencies (USD, EUR)
+      - Large balances
+      - Negative balances
+  - **Outcomes**: Build successful (228.82 kB JS, 23.70 kB CSS, 2.20s), 0 lint errors, 8/8 tests passed in 62ms
+  - **Learnings**: Vitest provides fast unit testing for React components; Intl.NumberFormat handles currency formatting elegantly
+  - **Commit**: db3c048
 
 ---
 
