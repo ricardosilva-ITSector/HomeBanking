@@ -794,26 +794,43 @@ A task achieves "DONE" status when:
 ---
 
 ### Task T014: Configure Tailwind CSS + shadcn/ui
-- **Status**: pending
+- **Status**: completed
 - **Dependencies**: T013
 - **Estimate**: M
 - **Description**: Setup Tailwind CSS and install shadcn/ui components
 - **DoD**:
-  - [ ] Install Tailwind CSS (4.0+) and dependencies
-  - [ ] Configure tailwind.config.js (dark theme, content paths)
-  - [ ] Update index.css with Tailwind directives
-  - [ ] Initialize shadcn/ui (`npx shadcn@latest init`)
-  - [ ] Configure dark theme in components.json
-  - [ ] Install initial components: Button, Card, Input, Label, Select
-  - [ ] Create ui/ folder with components
-  - [ ] Verify Tailwind classes work in App.tsx
-  - [ ] Builds without errors
-  - [ ] No lint errors
-  - [ ] New tests: N/A (UI validation)
-  - [ ] All tests pass: N/A
-  - [ ] Docs updated: N/A
-  - [ ] Committed with message: "feat(web): configure Tailwind CSS and shadcn/ui"
-- **Plan Changes**: _(filled post-completion)_
+  - [x] Install Tailwind CSS (4.0+) and dependencies
+  - [x] Configure tailwind.config.js (dark theme, content paths)
+  - [x] Update index.css with Tailwind directives
+  - [x] Initialize shadcn/ui (`npx shadcn@latest init`)
+  - [x] Configure dark theme in components.json
+  - [x] Install initial components: Button, Card, Input, Label, Select
+  - [x] Create ui/ folder with components
+  - [x] Verify Tailwind classes work in App.tsx
+  - [x] Builds without errors
+  - [x] No lint errors
+  - [x] New tests: N/A (UI validation)
+  - [x] All tests pass: N/A
+  - [x] Docs updated: N/A
+  - [x] Committed with message: "feat(web): configure Tailwind CSS and shadcn/ui"
+- **Plan Changes**:
+  - **Completion Time**: ~20 min (estimated 1-2h)
+  - **Actual Implementation**:
+    - Installed Tailwind CSS 4.0.0 with @tailwindcss/vite 4.0.0 plugin
+    - **Vite Downgrade**: Vite 7.3.1 → 6.4.1 for @tailwindcss/vite compatibility
+    - Created tailwind.config.js with dark mode support (class-based)
+    - Updated src/index.css with @import "tailwindcss" + CSS variables for theming
+    - Updated vite.config.ts with @tailwindcss/vite plugin and path alias resolution (@/*)
+    - Configured path aliases in tsconfig.json and tsconfig.app.json
+    - Initialized shadcn/ui: New York style, Neutral color, CSS variables enabled
+    - Created components.json for shadcn/ui configuration
+    - Installed 5 components: Button, Card, Input, Label, Select in src/components/ui/
+    - Created src/lib/utils.ts with cn() utility function
+    - Updated App.tsx to demonstrate Button and Card components with Tailwind classes
+    - Additional dependencies: clsx, tailwind-merge, tailwindcss-animate, class-variance-authority, lucide-react, Radix UI primitives
+  - **Outcomes**: Build successful (18.30 kB CSS, 226.77 kB JS gzipped), 0 lint errors, dark mode ready
+  - **Learnings**: Tailwind CSS 4.x requires @tailwindcss/vite plugin for Vite; currently incompatible with Vite 7.x
+  - **Commit**: 526333f
 
 ---
 
