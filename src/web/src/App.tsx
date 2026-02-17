@@ -1,34 +1,47 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-8">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Welcome to HomeBanking</CardTitle>
+          <CardDescription>
+            Tailwind CSS 4.x + shadcn/ui successfully configured
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-4 items-center justify-center">
+            <Button onClick={() => setCount((count) => count + 1)}>
+              Count is {count}
+            </Button>
+            <Button variant="outline" onClick={() => setCount(0)}>
+              Reset
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground text-center">
+            Click the buttons to test the components
+          </p>
+        </CardContent>
+        <CardFooter className="flex justify-center">
+          <p className="text-xs text-muted-foreground">
+            React 19.2.0 + Vite 7.3.1 + TypeScript 5.9.3
+          </p>
+        </CardFooter>
+      </Card>
+    </div>
   )
 }
 
