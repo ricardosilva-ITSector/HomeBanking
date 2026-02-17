@@ -873,24 +873,45 @@ A task achieves "DONE" status when:
 ---
 
 ### Task T016: Create App Layout and Theme
-- **Status**: pending
+- **Status**: completed
 - **Dependencies**: T014
 - **Estimate**: S
 - **Description**: Build main app layout with header and dark theme styling
 - **DoD**:
-  - [ ] App.tsx with main layout container
-  - [ ] Header component (app title, logo placeholder)
-  - [ ] Dark theme background (bg-slate-950, text-slate-50)
-  - [ ] Responsive container (max-width, padding)
-  - [ ] Global font (system font stack or Inter)
-  - [ ] Visually verified in browser
-  - [ ] Builds without errors
-  - [ ] No lint errors
-  - [ ] New tests: N/A
-  - [ ] All tests pass: N/A
-  - [ ] Docs updated: N/A
-  - [ ] Committed with message: "feat(web): create app layout with dark theme"
-- **Plan Changes**: _(filled post-completion)_
+  - [x] App.tsx with main layout container
+  - [x] Header component (app title, logo placeholder)
+  - [x] Dark theme background (bg-slate-950, text-slate-50)
+  - [x] Responsive container (max-width, padding)
+  - [x] Global font (system font stack or Inter)
+  - [x] Visually verified in browser
+  - [x] Builds without errors
+  - [x] No lint errors
+  - [x] New tests: N/A
+  - [x] All tests pass: N/A
+  - [x] Docs updated: N/A
+  - [x] Committed with message: "feat(web): create app layout with dark theme"
+- **Plan Changes**:
+  - **Completion Time**: ~10 min (estimated 30-60min)
+  - **Actual Implementation**:
+    - Created src/components/Header.tsx:
+      - Building2 icon from Lucide (blue accent) as logo
+      - "HomeBanking" title with proper typography
+      - Dark theme styling: bg-slate-900/50, border-b border-slate-800
+      - Sticky positioning with backdrop blur effect
+      - Responsive padding (px-4 sm:px-6 lg:px-8)
+    - Updated src/App.tsx:
+      - Main layout: min-h-screen bg-slate-950 text-slate-50
+      - Responsive container: max-w-7xl mx-auto with breakpoint-based padding
+      - Removed demo button/card from T014
+      - Clean structure with Header at top and main content area
+    - Updated src/index.css:
+      - System font stack (Apple, Segoe UI, Roboto, etc.)
+      - Font smoothing for crisp rendering
+      - Dark mode as default (color-scheme: dark)
+      - Hard-coded dark background/foreground on body
+  - **Outcomes**: Build successful (198.20 kB JS, 22.08 kB CSS, 2.24s), 0 lint errors, dark theme verified in browser
+  - **Learnings**: Tailwind backdrop-blur with sticky positioning creates polished header effect
+  - **Commit**: 66aa9d5
 
 ---
 
