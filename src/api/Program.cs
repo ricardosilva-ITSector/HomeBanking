@@ -1,4 +1,5 @@
 using HomeBanking.Api.Data;
+using HomeBanking.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,9 @@ builder.Services.AddCors(options =>
 // Add DbContext with InMemory provider
 builder.Services.AddDbContext<HomeBankingDbContext>(options =>
     options.UseInMemoryDatabase("HomeBankingDb"));
+
+// Register application services
+builder.Services.AddScoped<ITransferService, TransferService>();
 
 // Add services to the container
 builder.Services.AddControllers();
