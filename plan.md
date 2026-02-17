@@ -2,18 +2,334 @@
 
 **Version**: 1.0  
 **Last Updated**: February 17, 2026  
-**Total Tasks**: 22  
+**Total Tasks**: 23 (T000-T022)  
 **Estimated Duration**: 8-10 days (single developer)
 
 ---
 
+## Definition of Done (DoD) - MANDATORY GATE
+
+**Purpose**: Every task must pass this gate before being marked complete. These criteria ensure quality, maintainability, and CI/CD reliability. **A task is NOT complete until the commit passes ALL GitHub Actions CI checks.**
+
+### Core Principles
+
+1. **Local/CI Parity**: If it passes locally, it MUST pass in CI. No surprises on PR.
+2. **Known Good State**: Never leave the codebase in a broken state between tasks.
+3. **Incremental Progress**: Each task is independently deployable and testable.
+4. **Self-Documenting**: Code, commits, and plan updates tell the story.
+
+---
+
+### MANDATORY CHECKLIST (All items required)
+
+Every task MUST satisfy ALL of the following before marking as `completed`:
+
+#### ✅ Build & Compilation
+- [ ] **Backend builds successfully** (if applicable)
+  - No compilation errors
+  - No build warnings (`TreatWarningsAsErrors=true`)
+  - All NuGet packages restore correctly
+- [ ] **Frontend builds successfully** (if applicable)
+  - TypeScript compilation passes (strict mode)
+  - Vite build completes without errors
+  - No missing dependencies
+
+#### ✅ Code Quality & Linting
+- [ ] **Zero lint errors** across entire codebase
+  - Backend: Roslyn analyzers, StyleCop (if configured)
+  - Frontend: ESLint with TypeScript rules
+  - No warnings suppressed without justification
+- [ ] **Code formatting** consistent
+  - Backend: .editorconfig rules followed
+  - Frontend: Prettier configured and applied
+
+#### ✅ Testing
+- [ ] **New tests created** for all new functionality
+  - Unit tests for business logic (services, utilities)
+  - Component tests for UI components (if applicable)
+  - Integration tests for API endpoints (if applicable)
+  - E2E tests for critical user flows (if applicable)
+- [ ] **ALL tests pass** (100% pass rate)
+  - Existing tests still passing (no regressions)
+  - New tests passing
+  - Test coverage maintained or improved
+  - No flaky tests introduced
+- [ ] **Test quality standards met**
+  - Tests are deterministic and reliable
+  - Tests follow AAA pattern (Arrange/Act/Assert)
+  - Tests have clear, descriptive names
+  - No `skip` or `only` left in test files
+
+#### ✅ Documentation
+- [ ] **Code comments updated** where relevant
+  - XML documentation for public APIs (C#)
+  - JSDoc for exported functions (TypeScript)
+  - Complex logic explained inline
+- [ ] **README updates** (if applicable)
+  - New setup steps documented
+  - New scripts/commands explained
+  - Prerequisites updated
+- [ ] **API documentation current** (if applicable)
+  - Scalar/OpenAPI specs reflect changes
+  - Request/response examples accurate
+
+#### ✅ Version Control
+- [ ] **Changes committed** with conventional commit message
+  - Format: `type(scope): description`
+  - Types: `feat`, `fix`, `test`, `refactor`, `docs`, `chore`, `ci`
+  - Example: `feat(api): add account balance endpoint`
+- [ ] **Commit is atomic** (single logical change)
+- [ ] **No unrelated changes** included
+- [ ] **Sensitive data excluded** (no secrets, API keys, local paths)
+
+#### ✅ Plan Maintenance
+- [ ] **Task status updated** in plan.md
+  - Status changed to `completed`
+  - "Plan Changes" section filled out (see below)
+- [ ] **Downstream impacts assessed**
+  - Review all remaining tasks
+  - Identify dependencies affected by this task
+  - Update task estimates, DoD, or descriptions if needed
+  - Document changes in "Plan Changes" section
+- [ ] **plan.md committed** with task updates
+
+#### ✅ CI/CD Gate (CRITICAL)
+- [ ] **All GitHub Actions workflows pass** ✅ GREEN
+  - Commit pushed to branch
+  - CI build completes successfully
+  - All CI tests pass (same commands as local validation)
+  - No CI-only failures ("works on my machine" prohibited)
+  - Screenshots/artifacts reviewed if applicable
+
+---
+
+### VALIDATION COMMANDS (Local & CI Must Match)
+
+**These exact commands MUST pass locally before pushing, and CI MUST run the same commands:**
+
+#### Backend Validation
+```powershell
+# Navigate to API project
+cd src/api
+
+# Restore dependencies
+dotnet restore
+
+# Build (with warnings as errors)
+dotnet build --no-restore --configuration Release /p:TreatWarningsAsErrors=true
+
+# Run all tests
+dotnet test --no-build --configuration Release --verbosity normal
+
+# Verify no lint warnings (if using analyzers)
+dotnet build --no-restore /p:EnforceCodeStyleInBuild=true
+```
+
+#### Frontend Validation
+```powershell
+# Navigate to web project
+cd src/web
+
+# Clean install dependencies
+npm ci
+
+# Lint
+npm run lint
+
+# Type check
+npm run type-check  # or: npx tsc --noEmit
+
+# Build
+npm run build
+
+# Unit tests
+npm run test:unit
+
+# E2E tests (requires API running)
+npm run test:e2e
+```
+
+#### Full Stack Validation (Pre-Push)
+```powershell
+# From repository root
+# Run backend validation
+cd src/api
+dotnet build --configuration Release /p:TreatWarningsAsErrors=true
+dotnet test --configuration Release
+
+# Run frontend validation
+cd ../web
+npm ci
+npm run lint
+npm run build
+npm run test:unit
+
+# Start servers and run E2E (in separate terminal)
+# Terminal 1: cd src/api && dotnet run
+# Terminal 2: cd src/web && npm run dev
+# Terminal 3: cd src/web && npm run test:e2e
+```
+
+**CRITICAL**: CI workflow MUST execute these exact commands in the same order.
+
+---
+
+### TASK COMPLETION WORKFLOW
+
+Follow this workflow when completing each task:
+
+1. **Implement** the task requirements
+2. **Self-review** code for quality and completeness
+3. **Run validation commands** locally (see above)
+4. **Fix any issues** until all validations pass
+5. **Write/update tests** for new functionality
+6. **Run ALL tests** again to ensure 100% pass rate
+7. **Update documentation** (code comments, README, etc.)
+8. **Review downstream tasks** in plan.md
+   - Identify tasks affected by this work
+   - Update task descriptions, estimates, DoD items
+   - Document why changes were needed
+9. **Update plan.md** for this task:
+   - Change status to `completed`
+   - Fill in "Plan Changes" section (see template below)
+10. **Commit changes** with conventional commit message
+11. **Push to branch** and verify CI is green
+12. **Only after CI passes**: Task is DONE ✅
+
+---
+
+### "PLAN CHANGES" SECTION TEMPLATE
+
+When completing a task, fill in the "Plan Changes" section with:
+
+```markdown
+- **Plan Changes**: 
+  - Completed: [Date], [Time spent vs. estimate]
+  - Downstream impacts: 
+    - T00X: [Briefly describe change and reason]
+    - T00Y: [Briefly describe change and reason]
+  - Learnings: [Any discoveries, gotchas, or decisions made]
+  - Commit: [Commit SHA]
+  - CI Status: ✅ GREEN [link to workflow run]
+```
+
+**Example**:
+```markdown
+- **Plan Changes**: 
+  - Completed: Feb 17 2026, 2h (estimated 1.5h)
+  - Downstream impacts:
+    - T015: Added authentication headers to API client requirements
+    - T019: Transfer form now needs token management
+  - Learnings: CORS required credentials:true for cookies
+  - Commit: abc123f
+  - CI Status: ✅ GREEN https://github.com/.../actions/runs/123
+```
+
+If NO changes to downstream tasks: 
+```markdown
+- **Plan Changes**: 
+  - Completed: Feb 17 2026, 1.5h (as estimated)
+  - Downstream impacts: None
+  - Learnings: None
+  - Commit: abc123f
+  - CI Status: ✅ GREEN https://github.com/.../actions/runs/123
+```
+
+---
+
+### AI-ASSISTED DEVELOPMENT BEST PRACTICES
+
+Additional guidelines for working with AI coding assistants:
+
+1. **Explicit Validation**: Always run exact commands, never assume AI output is correct
+2. **Incremental Verification**: Test after each logical change, not just at task end
+3. **Plan Synchronization**: Update plan.md immediately when tasks evolve
+4. **Context Preservation**: Commit frequently to preserve working states
+5. **Reproducibility**: Document environment setup, versions, non-obvious steps
+6. **Error Transparency**: When validation fails, include full error output in context
+7. **Human Review Gates**: Final code review before marking task complete
+8. **Regression Prevention**: Always run full test suite, not just new tests
+
+---
+
+### FAILURE STATES & RECOVERY
+
+If a validation gate FAILS:
+
+1. **DO NOT mark task as complete**
+2. **DO NOT move to next task**
+3. **Fix the failure** immediately
+4. **Re-run full validation** from scratch
+5. **Document** what went wrong and how it was fixed
+6. **Update plan.md** if failure revealed wrong estimates/approach
+
+If **CI fails** but local passes:
+
+1. **Investigate differences** (environment, dependencies, timing)
+2. **Reproduce failure locally** (use same Node/dotnet versions)
+3. **Fix root cause** (usually missing dependency, env var, or race condition)
+4. **Update validation commands** if gap found
+5. **Document** in "Learnings" section
+
+---
+
+### SUCCESS CRITERIA
+
+A task achieves "DONE" status when:
+
+- ✅ All mandatory checklist items satisfied
+- ✅ All validation commands pass locally
+- ✅ Changes committed with good message
+- ✅ Pushed to branch
+- ✅ **GitHub Actions CI is GREEN** 🟢
+- ✅ plan.md updated with completion details
+- ✅ No known issues or technical debt introduced
+
+**Remember**: GREEN CI is the ultimate gate. If CI is red, the task is NOT done.
+
+---
+
 ## Table of Contents
+0. [Environment Bootstrap](#phase-0-environment-bootstrap)
 1. [Project Setup](#phase-1-project-setup)
 2. [Backend API](#phase-2-backend-api)
 3. [Frontend Foundation](#phase-3-frontend-foundation)
 4. [Frontend Features](#phase-4-frontend-features)
 5. [Testing](#phase-5-testing)
 6. [CI/CD & Documentation](#phase-6-cicd--documentation)
+
+---
+
+## Phase 0: Environment Bootstrap
+
+### Task T000: Project Scaffold and Build Verification
+- **Status**: completed
+- **Dependencies**: none
+- **Estimate**: S
+- **Description**: Scaffold both projects and verify clean builds before implementation begins
+- **DoD**: 
+  - [x] Folder structure created (src/api, src/web, docs, .github/workflows)
+  - [x] .NET Core 9 Web API project scaffolded in src/api
+  - [x] TreatWarningsAsErrors enabled in .csproj
+  - [x] React+Vite+TypeScript project scaffolded in src/web
+  - [x] Both projects build successfully (dotnet build, npm run build)
+  - [x] No application code written (template code only)
+  - [x] Dependencies installed and verified
+  - [x] Committed with message: "T000: project scaffold and build verification"
+  - [x] plan.md updated with T000 task
+- **Plan Changes**: 
+  - Completed: Feb 17 2026, ~30min
+  - Downstream impacts:
+    - T001: Now focuses only on .gitignore and README (folder structure already done)
+    - T002: .NET project already exists, task will focus on configuration only
+    - T013: React+Vite project already exists, task will focus on configuration only
+  - Learnings: 
+    - React 19.2.0 scaffolded (newer than spec's 18.3, compatible)
+    - TypeScript 5.9.3 scaffolded (close to spec's 5.7+)
+    - Vite 7.3.1 scaffolded (newer than spec's 6.0+, compatible)
+    - npm install required after Vite create (dependencies partially installed)
+  - Commit: (pending)
+  - CI Status: (pending - will be verified after commit)
 
 ---
 
@@ -555,13 +871,14 @@
 
 | Phase | Tasks | Total Estimate |
 |-------|-------|----------------|
+| Environment Bootstrap | T000 | S (0.5h) ✅ |
 | Project Setup | T001 | S (2h) |
 | Backend API | T002-T012 | 7S + 3M = 9.5 days |
 | Frontend Foundation | T013-T016 | 2S + 2M = 1.5 days |
 | Frontend Features | T017-T019 | 2M + 1L = 2 days |
 | Testing | T020-T021 | S + M = 1 day |
 | CI/CD & Docs | T022 | M (4h) |
-| **Total** | **22 tasks** | **~8-10 days** |
+| **Total** | **23 tasks** | **~8-10 days** |
 
 **Size Legend**:
 - **S (Small)**: 1-2 hours
