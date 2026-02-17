@@ -97,6 +97,57 @@ src/web/
 - **eslint.config.js**: ESLint with TypeScript and React rules
 - **.prettierrc.json**: Prettier code formatting rules
 
+## Testing
+
+### Unit Testing
+
+Run unit tests with Vitest:
+
+```bash
+npm run test
+```
+
+### E2E Testing
+
+This project uses **Playwright** for end-to-end testing.
+
+#### Prerequisites
+
+Before running E2E tests, ensure:
+1. **Backend API server** is running on `http://localhost:5000`
+2. **Frontend dev server** is running on `http://localhost:5173`
+
+#### Install Browsers
+
+If you haven't installed Playwright browsers yet:
+
+```bash
+npx playwright install
+```
+
+#### Run E2E Tests
+
+Run all E2E tests in headless mode:
+
+```bash
+npm run test:e2e
+```
+
+Run E2E tests with Playwright UI (for debugging and interactive mode):
+
+```bash
+npm run test:e2e:ui
+```
+
+#### E2E Test Coverage
+
+The E2E test suite includes:
+- **Dashboard**: Verifies accounts and transactions are loaded
+- **Transactions**: Validates transaction list with categories  
+- **Transfer**: Tests complete transfer flow end-to-end
+
+All tests include screenshots on failure for debugging.
+
 ## Available Scripts
 
 | Command | Description |
@@ -105,6 +156,9 @@ src/web/
 | `npm run build` | Build for production |
 | `npm run lint` | Run ESLint |
 | `npm run preview` | Preview production build |
+| `npm run test` | Run unit tests with Vitest |
+| `npm run test:e2e` | Run E2E tests with Playwright (headless) |
+| `npm run test:e2e:ui` | Run E2E tests with Playwright UI |
 
 ## Development Notes
 
