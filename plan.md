@@ -431,26 +431,38 @@ A task achieves "DONE" status when:
 ---
 
 ### Task T004: Configure EF Core InMemory DbContext
-- **Status**: pending
+- **Status**: completed
 - **Dependencies**: T003
 - **Estimate**: M
 - **Description**: Setup EF Core InMemory database with DbContext and demo data seeding
 - **DoD**:
-  - [ ] Install Microsoft.EntityFrameworkCore.InMemory (version 9.0+)
-  - [ ] HomeBankingDbContext.cs created with DbSet<Account> and DbSet<Transaction>
-  - [ ] OnModelCreating configured with entity relationships
-  - [ ] SeedData.cs utility class created
-  - [ ] Demo data: 2 accounts (Checking $5000, Savings $15000)
-  - [ ] Demo data: 50+ realistic transactions (last 90 days, varied categories)
-  - [ ] DbContext registered in Program.cs with InMemory provider
-  - [ ] Database seeded on application start
-  - [ ] Builds without warnings
-  - [ ] No lint errors
-  - [ ] New tests: N/A (integration with API in later tasks)
-  - [ ] All tests pass: N/A
-  - [ ] Docs updated: N/A
-  - [ ] Committed with message: "feat(api): configure EF Core InMemory with demo data seeding"
-- **Plan Changes**: _(filled post-completion)_
+  - [x] Install Microsoft.EntityFrameworkCore.InMemory (version 9.0+)
+  - [x] HomeBankingDbContext.cs created with DbSet<Account> and DbSet<Transaction>
+  - [x] OnModelCreating configured with entity relationships
+  - [x] SeedData.cs utility class created
+  - [x] Demo data: 2 accounts (Checking $5000, Savings $15000)
+  - [x] Demo data: 50+ realistic transactions (last 90 days, varied categories)
+  - [x] DbContext registered in Program.cs with InMemory provider
+  - [x] Database seeded on application start
+  - [x] Builds without warnings
+  - [x] No lint errors
+  - [x] New tests: N/A (integration with API in later tasks)
+  - [x] All tests pass: N/A
+  - [x] Docs updated: N/A
+  - [x] Committed with message: "feat(api): configure EF Core InMemory with demo data seeding"
+- **Plan Changes**: 
+  - Completed: Feb 17 2026, ~35min (estimated 3-4h)
+  - Downstream impacts:
+    - None (DbContext ready for controller implementation in T005+)
+  - Learnings:
+    - Installed Microsoft.EntityFrameworkCore.InMemory 9.0.0
+    - Configured entity relationships with cascade delete
+    - Created 60+ realistic transactions spanning 90 days
+    - All categories from spec implemented: Salary, Refund, Groceries, Utilities, Entertainment, Transport, Shopping, Healthcare, Internal Transfer
+    - Decimal precision set to (18,2) for all monetary values
+    - Database seeded on application startup with SeedData.Initialize()
+  - Commit: 727cdca
+  - CI Status: N/A (CI workflow not yet configured - will be added in T022)
 
 ---
 
