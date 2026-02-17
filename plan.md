@@ -337,22 +337,30 @@ A task achieves "DONE" status when:
 ## Phase 1: Project Setup
 
 ### Task T001: Initialize Monorepo Structure
-- **Status**: pending
+- **Status**: completed
 - **Dependencies**: none
 - **Estimate**: S
 - **Description**: Create root folder structure, .gitignore, and README
 - **DoD**: 
-  - [ ] Root folder structure created (src/api, src/web, docs, .github/workflows)
-  - [ ] .gitignore configured for .NET and Node.js
-  - [ ] README.md with project overview and setup instructions
-  - [ ] Git repository initialized
-  - [ ] Builds successfully (no projects yet)
-  - [ ] No lint errors
-  - [ ] New tests: N/A
-  - [ ] All tests pass: N/A
-  - [ ] Docs updated: README.md created
-  - [ ] Committed with message: "chore: initialize monorepo structure"
-- **Plan Changes**: _(filled post-completion)_
+  - [x] Root folder structure created (src/api, src/web, docs, .github/workflows)
+  - [x] .gitignore configured for .NET and Node.js
+  - [x] README.md with project overview and setup instructions
+  - [x] Git repository initialized
+  - [x] Builds successfully (no projects yet)
+  - [x] No lint errors
+  - [x] New tests: N/A
+  - [x] All tests pass: N/A
+  - [x] Docs updated: README.md created
+  - [x] Committed with message: "chore: initialize monorepo structure"
+- **Plan Changes**: 
+  - Completed: Feb 17 2026, ~30min (as estimated)
+  - Downstream impacts:
+    - None (T000 already created folder structure, T001 focused on documentation)
+  - Learnings:
+    - README.md updated with comprehensive setup instructions, tech stack, and project structure
+    - .gitignore already comprehensive (no changes needed)
+  - Commit: a7b133b
+  - CI Status: N/A (CI workflow not yet configured - will be added in T022)
 
 ---
 
