@@ -2,6 +2,7 @@
 
 A modern home banking demo application showcasing account management, transaction history, and money transfers. Built with .NET Core 9 API backend and React+Vite frontend as a demonstration and portfolio project.
 
+[![CI](https://github.com/yourusername/homebanking/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/homebanking/actions/workflows/ci.yml)
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript)](https://www.typescriptlang.org/)
