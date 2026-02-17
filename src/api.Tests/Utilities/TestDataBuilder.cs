@@ -95,4 +95,33 @@ public static class TestDataBuilder
             BalanceAfter = 0m // Will be calculated in actual scenarios
         };
     }
+
+    /// <summary>
+    /// Creates a collection of sample transactions for testing.
+    /// </summary>
+    /// <param name="accountId">The account ID for the transactions.</param>
+    /// <param name="count">Number of transactions to create.</param>
+    /// <returns>A list of Transaction entities with test data.</returns>
+    public static List<Transaction> CreateSampleTransactions(Guid accountId, int count = 5)
+    {
+        var transactions = new List<Transaction>();
+        var baseDate = DateTime.UtcNow.AddDays(-count);
+
+        for (int i = 0; i < count; i++)
+        {
+            transactions.Add(new Transaction
+            {
+                Id = Guid.NewGuid(),
+                AccountId = accountId,
+                Date = baseDate.AddDays(i),
+                Description = $"Test Transaction {i + 1}",
+                Amount = (i + 1) * 10.00m,
+                Type = i % 2 == 0 ? TransactionType.Debit : TransactionType.Credit,
+                Category = i % 2 == 0 ? "Transfer" : "Income",
+                BalanceAfter = 1000.00m + ((i + 1) * 10.00m)
+            });
+        }
+
+        return transactions;
+    }
 }
