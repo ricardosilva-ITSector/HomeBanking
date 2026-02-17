@@ -112,18 +112,54 @@ jobs:
       - name: Start backend API
         run: |
           cd src/api
-          dotnet run --configuration Release --no-build &
-          echo "Waiting for API to start..."
-          timeout 30 bash -c 'until curl -f http://localhost:5000/health; do sleep 1; done' || exit 1
-        env:
-          ASPNETCORE_URLS: http://localhost:5000
+          dotnet run --configuration Release --no-build --urls "http://localhost:5000" > /tmp/api.log 2>&1 &
+          API_PID=$!
+          echo "Backend API started with PID: $API_PID"
+          echo "Waiting for API to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:5000/health 2>/dev/null; then
+              echo "API is ready!"
+              break
+            fi
+            if ! kill -0 $API_PID 2>/dev/null; then
+              echo "API process died, logs:"
+              cat /tmp/api.log
+              exit 1
+            fi
+            echo "Attempt $i/30: API not ready yet..."
+            sleep 1
+          done
+          if ! curl -f http://localhost:5000/health 2>/dev/null; then
+            echo "API failed to start in time, logs:"
+            cat /tmp/api.log
+            exit 1
+          fi
 
       - name: Start frontend dev server
         run: |
           cd src/web
-          npm run dev &
-          echo "Waiting for frontend to start..."
-          timeout 30 bash -c 'until curl -f http://localhost:5173; do sleep 1; done' || exit 1
+          npm run dev > /tmp/vite.log 2>&1 &
+          VITE_PID=$!
+          echo "Frontend server started with PID: $VITE_PID"
+          echo "Waiting for frontend to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:5173 2>/dev/null; then
+              echo "Frontend is ready!"
+              break
+            fi
+            if ! kill -0 $VITE_PID 2>/dev/null; then
+              echo "Vite process died, logs:"
+              cat /tmp/vite.log
+              exit 1
+            fi
+            echo "Attempt $i/30: Frontend not ready yet..."
+            sleep 1
+          done
+          if ! curl -f http://localhost:5173 2>/dev/null; then
+            echo "Frontend failed to start in time, logs:"
+            cat /tmp/vite.log
+            exit 1
+          fi
 
       - name: Run E2E tests
         run: npm run test:e2e

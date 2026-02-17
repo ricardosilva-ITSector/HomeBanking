@@ -47,8 +47,9 @@ test.describe('Transfer', () => {
     await submitButton.click();
 
     // Wait for success message
-    await page.waitForSelector('text=/Transfer successful/i, [data-testid="success-message"], .alert-success', {
-      timeout: 10000,
+    await page.locator('[data-testid="success-message"]').waitFor({ 
+      state: 'visible',
+      timeout: 10000 
     });
 
     // Verify "Transfer successful!" message appears

@@ -171,11 +171,12 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
         <CardTitle className="text-xl text-slate-100">Make a Transfer</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" data-testid="transfer-form">
           {/* Success Message */}
           {successMessage && (
             <div
               className="bg-green-950 border border-green-800 rounded-lg p-4"
+              data-testid="success-message"
               role="alert"
               aria-live="polite"
             >
@@ -210,6 +211,7 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
             >
               <SelectTrigger
                 id="fromAccount"
+                data-testid="from-account"
                 className="bg-slate-950 border-slate-700 text-slate-100"
                 aria-invalid={!!errors.fromAccountId}
                 aria-describedby={errors.fromAccountId ? 'fromAccount-error' : undefined}
@@ -251,6 +253,7 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
             >
               <SelectTrigger
                 id="toAccount"
+                data-testid="to-account"
                 className="bg-slate-950 border-slate-700 text-slate-100"
                 aria-invalid={!!errors.toAccountId}
                 aria-describedby={errors.toAccountId ? 'toAccount-error' : undefined}
@@ -288,6 +291,7 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
               </span>
               <Input
                 id="amount"
+                data-testid="amount"
                 type="text"
                 inputMode="decimal"
                 value={amount}
@@ -312,6 +316,7 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
             </Label>
             <Textarea
               id="description"
+              data-testid="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter transfer description"
@@ -324,6 +329,7 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
           {/* Submit Button */}
           <Button
             type="submit"
+            data-testid="submit-transfer"
             disabled={isSubmitting}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white disabled:bg-slate-700 disabled:text-slate-400"
           >
