@@ -5,14 +5,12 @@ test.describe('Dashboard', () => {
     // Navigate to the dashboard
     await page.goto('/');
 
-    // Wait for accounts cards to appear
-    await page.waitForSelector('[data-testid="account-card"], .account-card, [class*="AccountCard"]', {
-      timeout: 10000,
-    });
+    // Wait for page to load by checking for main heading
+    await expect(page.getByRole('heading', { name: 'My Accounts' })).toBeVisible();
 
-    // Verify at least 1 account is visible
-    const accountCards = page.locator('[data-testid="account-card"], .account-card, [class*="AccountCard"]');
-    await expect(accountCards.first()).toBeVisible();
+    // Verify at least 1 account card is visible (using more specific selectors)
+    const accountCards = page.locator('[class*="grid"] > div').filter({ hasText: /Checking|Savings/ });
+    await expect(accountCards.first()).toBeVisible({ timeout: 10000 });
 
     // Verify transactions table is visible
     const transactionsTable = page.locator('[data-testid="transactions-table"], table, [class*="TransactionList"]');
