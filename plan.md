@@ -684,23 +684,40 @@ A task achieves "DONE" status when:
 ---
 
 ### Task T011: API Unit Tests Setup
-- **Status**: pending
+- **Status**: completed
 - **Dependencies**: T002
 - **Estimate**: S
 - **Description**: Create test project and configure testing infrastructure
 - **DoD**:
-  - [ ] Create HomeBanking.Api.Tests project (xUnit)
-  - [ ] Install xUnit, FluentAssertions, Moq, Microsoft.AspNetCore.Mvc.Testing
-  - [ ] Setup test utilities (InMemory DbContext factory, test data builders)
-  - [ ] Example test for TransferService validates setup
-  - [ ] Tests run via `dotnet test`
-  - [ ] Builds without warnings
-  - [ ] No lint errors
-  - [ ] New tests: 1 example test
-  - [ ] All tests pass
-  - [ ] Docs updated: N/A
-  - [ ] Committed with message: "test(api): setup unit test project infrastructure"
-- **Plan Changes**: _(filled post-completion)_
+  - [x] Create HomeBanking.Api.Tests project (xUnit)
+  - [x] Install xUnit, FluentAssertions, Moq, Microsoft.AspNetCore.Mvc.Testing
+  - [x] Setup test utilities (InMemory DbContext factory, test data builders)
+  - [x] Example test for TransferService validates setup
+  - [x] Tests run via `dotnet test`
+  - [x] Builds without warnings
+  - [x] No lint errors
+  - [x] New tests: 1 example test
+  - [x] All tests pass
+  - [x] Docs updated: N/A
+  - [x] Committed with message: "test(api): setup unit test project infrastructure"
+- **Plan Changes**: 
+  - Completed: Feb 17 2026, ~25min (estimated 1-2h)
+  - Downstream impacts:
+    - T012: Test infrastructure ready for comprehensive test coverage
+  - Learnings:
+    - Created HomeBanking.Api.Tests project with .NET 9
+    - Installed packages: xUnit 2.9.2, FluentAssertions 8.8.0, Moq 4.20.72, Microsoft.AspNetCore.Mvc.Testing 9.0.0
+    - Created InMemoryDbContextFactory for test database contexts
+    - Created TestDataBuilder with sample accounts and transactions
+    - Implemented 6 TransferService tests (exceeds "1 example test" requirement):
+      - Self-transfer validation
+      - Amount limits (min, max, decimal precision)
+      - Successful transfer
+      - Insufficient funds validation
+    - All 6 tests passing
+    - Added to HomeBanking.sln
+  - Commit: c427306
+  - CI Status: N/A (CI workflow not yet configured - will be added in T022)
 
 ---
 
