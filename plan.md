@@ -835,23 +835,40 @@ A task achieves "DONE" status when:
 ---
 
 ### Task T015: Create API Client Service
-- **Status**: pending
+- **Status**: completed
 - **Dependencies**: T013, T008
 - **Estimate**: S
 - **Description**: Implement typed API client for backend communication
 - **DoD**:
-  - [ ] TypeScript interfaces (Account, Transaction, TransferRequest, TransferResponse)
-  - [ ] api.ts service with functions: getAccounts(), getTransactions(), createTransfer()
-  - [ ] Proper error handling and typing
-  - [ ] Base URL from environment variable
-  - [ ] Fetch API with JSON headers
-  - [ ] Builds without errors
-  - [ ] No lint errors
-  - [ ] New tests: N/A (integration tested with components)
-  - [ ] All tests pass: N/A
-  - [ ] Docs updated: N/A
-  - [ ] Committed with message: "feat(web): implement typed API client service"
-- **Plan Changes**: _(filled post-completion)_
+  - [x] TypeScript interfaces (Account, Transaction, TransferRequest, TransferResponse)
+  - [x] api.ts service with functions: getAccounts(), getTransactions(), createTransfer()
+  - [x] Proper error handling and typing
+  - [x] Base URL from environment variable
+  - [x] Fetch API with JSON headers
+  - [x] Builds without errors
+  - [x] No lint errors
+  - [x] New tests: N/A (integration tested with components)
+  - [x] All tests pass: N/A
+  - [x] Docs updated: N/A
+  - [x] Committed with message: "feat(web): implement typed API client service"
+- **Plan Changes**:
+  - **Completion Time**: ~10 min (estimated 30-60min)
+  - **Actual Implementation**:
+    - Created src/types/api.ts with TypeScript interfaces:
+      - AccountType, TransactionType enums
+      - Account, Transaction, TransferRequest, TransferResponse interfaces
+      - All properties match backend API camelCase serialization
+    - Created src/services/api.ts:
+      - getAccounts(): Promise<Account[]> - fetches all accounts
+      - getTransactions(accountId?, limit?, offset?): Promise<Transaction[]> - with optional filtering
+      - createTransfer(request: TransferRequest): Promise<TransferResponse> - creates transfer
+      - ApiError class for structured error handling
+      - handleResponse<T>() helper for response processing and error handling
+      - Base URL from VITE_API_BASE_URL environment variable (defaults to '/api')
+    - Created .env.development with VITE_API_BASE_URL=/api (proxied to backend)
+  - **Outcomes**: Build successful (226.77 kB JS, 19.49 kB CSS, 990ms), 0 lint errors, typed API client ready
+  - **Learnings**: Vite environment variables must be prefixed with VITE_ to be exposed to client code
+  - **Commit**: f9792a3
 
 ---
 
