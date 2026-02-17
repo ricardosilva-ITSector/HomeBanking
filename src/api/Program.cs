@@ -1,6 +1,7 @@
 using HomeBanking.Api.Data;
 using HomeBanking.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +30,18 @@ builder.Services.AddScoped<ITransferService, TransferService>();
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
+
+// Configure OpenAPI with metadata
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info.Title = "Home Banking API";
+        document.Info.Version = "v1";
+        document.Info.Description = "REST API for home banking operations including account management, transaction history, and money transfers.";
+        return Task.CompletedTask;
+    });
+});
 
 // Add health checks
 builder.Services.AddHealthChecks();
@@ -48,6 +60,7 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
