@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Header } from '@/components/Header'
 import { AccountCard } from '@/components/AccountCard'
 import { TransactionList } from '@/components/TransactionList'
+import { TransferForm } from '@/components/TransferForm'
 import { getAccounts } from '@/services/api'
 import type { Account } from '@/types/api'
 import './App.css'
@@ -11,22 +12,22 @@ function App() {
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const data = await getAccounts()
-        setAccounts(data)
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to load accounts'
-        )
-      } finally {
-        setLoading(false)
-      }
+  const fetchAccounts = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await getAccounts()
+      setAccounts(data)
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to load accounts'
+      )
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchAccounts()
   }, [])
 
@@ -70,6 +71,14 @@ function App() {
             Recent Transactions
           </h2>
           <TransactionList />
+        </div>
+
+        {/* Transfer Form Section */}
+        <div className="mt-12 space-y-6">
+          <h2 className="text-2xl font-bold text-slate-100">Make a Transfer</h2>
+          <div className="max-w-2xl">
+            <TransferForm accounts={accounts} onTransferSuccess={fetchAccounts} />
+          </div>
         </div>
       </main>
     </div>
