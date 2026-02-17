@@ -613,26 +613,38 @@ A task achieves "DONE" status when:
 ---
 
 ### Task T009: Add Scalar OpenAPI Documentation
-- **Status**: pending
+- **Status**: completed
 - **Dependencies**: T008
 - **Estimate**: S
 - **Description**: Configure Scalar for interactive API documentation
 - **DoD**:
-  - [ ] Install Scalar.AspNetCore NuGet package (1.2+)
-  - [ ] Configure Swagger/OpenAPI generation in Program.cs
-  - [ ] Add Scalar middleware (MapScalarApiReference)
-  - [ ] Configure API metadata (title, version, description)
-  - [ ] Endpoint accessible at /scalar/v1
-  - [ ] All endpoints documented with XML comments
-  - [ ] Request/response examples included
-  - [ ] Manually tested in browser
-  - [ ] Builds without warnings
-  - [ ] No lint errors
-  - [ ] New tests: N/A (UI validation)
-  - [ ] All tests pass
-  - [ ] Docs updated: README with Scalar URL
-  - [ ] Committed with message: "feat(api): add Scalar OpenAPI documentation"
-- **Plan Changes**: _(filled post-completion)_
+  - [x] Install Scalar.AspNetCore NuGet package (1.2+)
+  - [x] Configure Swagger/OpenAPI generation in Program.cs
+  - [x] Add Scalar middleware (MapScalarApiReference)
+  - [x] Configure API metadata (title, version, description)
+  - [x] Endpoint accessible at /scalar/v1
+  - [x] All endpoints documented with XML comments
+  - [x] Request/response examples included
+  - [x] Manually tested in browser
+  - [x] Builds without warnings
+  - [x] No lint errors
+  - [x] New tests: N/A (UI validation)
+  - [x] All tests pass
+  - [x] Docs updated: README with Scalar URL
+  - [x] Committed with message: "feat(api): add Scalar OpenAPI documentation"
+- **Plan Changes**: 
+  - Completed: Feb 17 2026, ~15min (estimated 1-2h)
+  - Downstream impacts:
+    - None (documentation enhancement only)
+  - Learnings:
+    - Installed Scalar.AspNetCore v2.12.41
+    - Enabled XML documentation generation in .csproj
+    - Configured OpenAPI with API metadata (title, version, description)
+    - Scalar endpoint accessible at /scalar/v1 in development mode
+    - Controllers already have comprehensive XML comments from T005-T008
+    - README already documented the Scalar endpoint
+  - Commit: b1ad0cd
+  - CI Status: N/A (CI workflow not yet configured - will be added in T022)
 
 ---
 
