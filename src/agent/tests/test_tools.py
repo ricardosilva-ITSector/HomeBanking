@@ -142,6 +142,141 @@ async def test_execute_transfer_success(sample_transfer_response):
 
 
 @pytest.mark.asyncio
+async def test_execute_transfer_resolves_checking_and_savings_references(sample_transfer_response):
+    """Test transfer resolves account type references to GUIDs."""
+    from tools import execute_transfer
+
+    sample_accounts = [
+        {
+            "id": "11111111-1111-1111-1111-111111111111",
+            "accountNumber": "123456",
+            "accountName": "My Checking Account",
+            "type": 0,
+            "balance": 337.66,
+        },
+        {
+            "id": "22222222-2222-2222-2222-222222222222",
+            "accountNumber": "789012",
+            "accountName": "My Savings Account",
+            "type": 1,
+            "balance": 16883.25,
+        },
+    ]
+
+    mock_accounts_response = MagicMock(spec=Response)
+    mock_accounts_response.status_code = 200
+    mock_accounts_response.json.return_value = sample_accounts
+    mock_accounts_response.raise_for_status = MagicMock()
+
+    mock_transfer_response = MagicMock(spec=Response)
+    mock_transfer_response.status_code = 200
+    mock_transfer_response.json.return_value = sample_transfer_response
+    mock_transfer_response.raise_for_status = MagicMock()
+
+    with patch('tools.httpx.AsyncClient') as mock_client_class:
+        mock_client = AsyncMock()
+        mock_client.get = AsyncMock(return_value=mock_accounts_response)
+        mock_client.post = AsyncMock(return_value=mock_transfer_response)
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=None)
+        mock_client_class.return_value = mock_client
+
+        result = await execute_transfer(
+            from_account_id="checking account",
+            to_account_id="savings account",
+            amount=25.00,
+            description="Reference-based transfer"
+        )
+
+        assert "success" in result.lower() or "completed" in result.lower()
+        sent_payload = mock_client.post.call_args.kwargs["json"]
+        assert sent_payload["fromAccountId"] == "11111111-1111-1111-1111-111111111111"
+        assert sent_payload["toAccountId"] == "22222222-2222-2222-2222-222222222222"
+
+
+@pytest.mark.asyncio
+async def test_execute_transfer_resolves_last4_references(sample_transfer_response):
+    """Test transfer resolves account last-4 references to GUIDs."""
+    from tools import execute_transfer
+
+    sample_accounts = [
+        {
+            "id": "11111111-1111-1111-1111-111111111111",
+            "accountNumber": "123456",
+            "accountName": "My Checking Account",
+            "type": 0,
+            "balance": 337.66,
+        },
+        {
+            "id": "22222222-2222-2222-2222-222222222222",
+            "accountNumber": "789012",
+            "accountName": "My Savings Account",
+            "type": 1,
+            "balance": 16883.25,
+        },
+    ]
+
+    mock_accounts_response = MagicMock(spec=Response)
+    mock_accounts_response.status_code = 200
+    mock_accounts_response.json.return_value = sample_accounts
+    mock_accounts_response.raise_for_status = MagicMock()
+
+    mock_transfer_response = MagicMock(spec=Response)
+    mock_transfer_response.status_code = 200
+    mock_transfer_response.json.return_value = sample_transfer_response
+    mock_transfer_response.raise_for_status = MagicMock()
+
+    with patch('tools.httpx.AsyncClient') as mock_client_class:
+        mock_client = AsyncMock()
+        mock_client.get = AsyncMock(return_value=mock_accounts_response)
+        mock_client.post = AsyncMock(return_value=mock_transfer_response)
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=None)
+        mock_client_class.return_value = mock_client
+
+        result = await execute_transfer(
+            from_account_id="3456",
+            to_account_id="9012",
+            amount=25.00,
+            description="Last4 transfer"
+        )
+
+        assert "success" in result.lower() or "completed" in result.lower()
+        sent_payload = mock_client.post.call_args.kwargs["json"]
+        assert sent_payload["fromAccountId"] == "11111111-1111-1111-1111-111111111111"
+        assert sent_payload["toAccountId"] == "22222222-2222-2222-2222-222222222222"
+
+
+@pytest.mark.asyncio
+async def test_execute_transfer_normalizes_currency_amount_string(sample_transfer_response):
+    """Test transfer accepts currency-formatted amount strings."""
+    from tools import execute_transfer
+
+    mock_response = MagicMock(spec=Response)
+    mock_response.status_code = 200
+    mock_response.json.return_value = sample_transfer_response
+    mock_response.raise_for_status = MagicMock()
+
+    with patch('tools.httpx.AsyncClient') as mock_client_class:
+        mock_client = AsyncMock()
+        mock_client.post = AsyncMock(return_value=mock_response)
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=None)
+        mock_client_class.return_value = mock_client
+
+        result = await execute_transfer(
+            from_account_id="9faa48b6-a3ca-4473-9804-64e9c52c5791",
+            to_account_id="ec647d6c-bb99-4d32-9c37-f1dacf11fc78",
+            amount="$25.00",
+            description="Currency formatted amount"
+        )
+
+        assert "success" in result.lower() or "completed" in result.lower()
+        sent_payload = mock_client.post.call_args.kwargs["json"]
+        assert sent_payload["amount"] == 25.0
+
+
+@pytest.mark.asyncio
 async def test_execute_transfer_insufficient_funds():
     """Test transfer with insufficient funds error."""
     from tools import execute_transfer

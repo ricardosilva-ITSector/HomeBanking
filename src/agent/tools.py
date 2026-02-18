@@ -8,6 +8,7 @@ import httpx
 import os
 from typing import Annotated, Optional
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,87 @@ BACKEND_URL = os.getenv("BACKEND_API_URL", "http://localhost:5091")
 
 # Configure httpx timeout (30 seconds)
 TIMEOUT = httpx.Timeout(30.0)
+
+
+GUID_PATTERN = re.compile(
+    r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+)
+
+
+def _requires_resolution(identifier: str) -> bool:
+    value = identifier.strip().lower()
+    if GUID_PATTERN.match(value):
+        return False
+
+    if value in {"checking", "savings", "checking account", "savings account"}:
+        return True
+
+    if "ending in" in value:
+        return True
+
+    if value.isdigit() and len(value) <= 4:
+        return True
+
+    if "account" in value and any(c.isalpha() for c in value):
+        return True
+
+    return False
+
+
+def _resolve_account_id(identifier: str, accounts: list[dict]) -> str:
+    value = identifier.strip()
+    value_lower = value.lower()
+
+    if GUID_PATTERN.match(value):
+        return value
+
+    for account in accounts:
+        account_id = account.get("id")
+        if account_id and str(account_id).lower() == value_lower:
+            return str(account_id)
+
+    if "checking" in value_lower:
+        for account in accounts:
+            account_type = account.get("type")
+            if account_type == 0:
+                return str(account.get("id"))
+
+    if "savings" in value_lower:
+        for account in accounts:
+            account_type = account.get("type")
+            if account_type == 1:
+                return str(account.get("id"))
+
+    digits = "".join(ch for ch in value if ch.isdigit())
+    if digits:
+        suffix = digits[-4:]
+        for account in accounts:
+            account_number = str(account.get("accountNumber", ""))
+            if account_number.endswith(suffix):
+                return str(account.get("id"))
+
+    for account in accounts:
+        account_name = str(account.get("accountName", "")).lower()
+        if account_name and account_name in value_lower:
+            return str(account.get("id"))
+
+    raise ValueError(f"Could not resolve account reference '{identifier}' to a valid account id")
+
+
+def _normalize_amount(value: float | str) -> float:
+    if isinstance(value, (int, float)):
+        return float(value)
+
+    raw = str(value).strip()
+    cleaned = re.sub(r"[^0-9.\-]", "", raw)
+    if cleaned.count(".") > 1:
+        first_dot = cleaned.find(".")
+        cleaned = cleaned[: first_dot + 1] + cleaned[first_dot + 1 :].replace(".", "")
+
+    if cleaned in {"", ".", "-", "-."}:
+        raise ValueError(f"Invalid amount value: {value}")
+
+    return float(cleaned)
 
 
 async def get_account_balances() -> str:
@@ -148,9 +230,9 @@ async def get_transactions(
 
 
 async def execute_transfer(
-    from_account_id: Annotated[str, "Source account GUID"],
-    to_account_id: Annotated[str, "Destination account GUID"],
-    amount: Annotated[float, "Transfer amount in dollars"],
+    from_account_id: Annotated[str, "Source account reference (GUID, account name, type, or last 4 digits)"],
+    to_account_id: Annotated[str, "Destination account reference (GUID, account name, type, or last 4 digits)"],
+    amount: Annotated[float | str, "Transfer amount in dollars (numeric value, e.g., 25 or '$25')"],
     description: Annotated[str, "Transfer description"] = "Transfer via AI Agent"
 ) -> str:
     """Execute a transfer between accounts.
@@ -169,28 +251,43 @@ async def execute_transfer(
     """
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resolved_from_account_id = from_account_id
+            resolved_to_account_id = to_account_id
+            normalized_amount = _normalize_amount(amount)
+
+            if _requires_resolution(from_account_id) or _requires_resolution(to_account_id):
+                accounts_response = await client.get(f"{BACKEND_URL}/api/accounts")
+                accounts_response.raise_for_status()
+                accounts_data = accounts_response.json()
+                accounts = accounts_data.get("value", []) if isinstance(accounts_data, dict) else accounts_data
+
+                resolved_from_account_id = _resolve_account_id(from_account_id, accounts)
+                resolved_to_account_id = _resolve_account_id(to_account_id, accounts)
+
             payload = {
-                "fromAccountId": from_account_id,
-                "toAccountId": to_account_id,
-                "amount": float(amount),
+                "fromAccountId": resolved_from_account_id,
+                "toAccountId": resolved_to_account_id,
+                "amount": normalized_amount,
                 "description": description
             }
             
-            logger.info(f"Executing transfer: ${amount} from {from_account_id[:8]}... to {to_account_id[:8]}...")
+            logger.info(
+                f"Executing transfer: ${normalized_amount} from {resolved_from_account_id[:8]}... to {resolved_to_account_id[:8]}..."
+            )
             
             response = await client.post(
                 f"{BACKEND_URL}/api/transfers",
                 json=payload
             )
             
-            if response.status_code == 200:
+            if response.is_success:
                 result = response.json()
                 debit_id = result.get('debitTransactionId', 'N/A')
                 credit_id = result.get('creditTransactionId', 'N/A')
                 
                 return (
                     f"✅ Transfer successful!\n\n"
-                    f"Amount: ${amount:,.2f}\n"
+                    f"Amount: ${normalized_amount:,.2f}\n"
                     f"Description: {description}\n"
                     f"Transaction IDs:\n"
                     f"  - Debit: {debit_id[:8]}...\n"
@@ -201,7 +298,7 @@ async def execute_transfer(
                 try:
                     error = response.json()
                     error_msg = error.get('title', 'Unknown error')
-                    details = error.get('detail', '')
+                    details = error.get('detail', '') or str(error)
                     return f"❌ Transfer failed: {error_msg}\n{details}"
                 except:
                     return f"❌ Transfer failed: API returned status {response.status_code}"
