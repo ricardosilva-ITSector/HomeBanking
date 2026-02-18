@@ -1,27 +1,25 @@
 """
 Home Banking AI Agent - HTTP Server
 
-This module provides a FastAPI server that exposes the agent as an HTTP endpoint.
+Authoritative runtime surface for web integration.
+Contract:
+- POST /agent/threads
+- POST /agent/messages (SSE)
+- GET  /agent/health
 """
 
-import asyncio
 import json
 import os
-import uuid
+from contextlib import asynccontextmanager
 from typing import Optional
 
-from agent_framework.azure import AzureAIClient
-from azure.identity.aio import DefaultAzureCredential
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-# Load environment variables
-load_dotenv(override=True)
-
-# Import tools
+from foundry_runtime import BaseRuntime, build_runtime
 from tools import (
     execute_transfer,
     get_account_balances,
@@ -29,13 +27,8 @@ from tools import (
     get_transactions,
 )
 
-# Test tool - simple function to verify tools work
-async def test_simple_tool() -> str:
-    """A simple test tool that returns a message. Call this to verify the agent can execute tools."""
-    print("🧪 TEST_SIMPLE_TOOL CALLED!")
-    return "✅ This is a test message from test_simple_tool(). Tools are working!"
+load_dotenv(override=True)
 
-# System prompt for the banking assistant
 SYSTEM_PROMPT = """You are a helpful banking assistant for a home banking application.
 
 CRITICAL: You MUST use your tools to get real data. DO NOT respond without calling the appropriate tool first.
@@ -57,246 +50,197 @@ IMPORTANT RULES:
 - ALWAYS use tools to get real data - NEVER make up information
 - For transfers, ALWAYS confirm before calling execute_transfer
 - Present data clearly with tables when appropriate
-
-EXAMPLE - Account balance request:
-User: "What are my account balances?"
-You: [IMMEDIATELY call get_account_balances() - no intro text]
-     Then show: "Here are your accounts: [data from tool]"
-
-EXAMPLE - Transfer request:
-User: "Transfer $50 from checking to savings"  
-You: [IMMEDIATELY call get_account_balances()]
-     Then: "I can transfer $50.00 from Checking (XXXX) to Savings (YYYY). Confirm?"
-User: "Yes"
-You: [IMMEDIATELY call execute_transfer()]
-     Then: "✅ Transfer complete!"
 """
 
-# FastAPI app
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    try:
+        yield
+    finally:
+        global runtime
+        if runtime is not None:
+            await runtime.stop()
+            runtime = None
+
+
 app = FastAPI(
     title="Home Banking AI Agent",
     description="AI-powered banking assistant API",
-    version="1.0.0"
+    version="1.2.0",
+    lifespan=lifespan,
 )
 
-# Enable CORS for web app
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5174", "http://127.0.0.1:5174"],  # Vite dev server
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Request/Response models
-class AgentRequest(BaseModel):
-    """Request model for agent interaction"""
+
+class CreateThreadResponse(BaseModel):
+    thread_id: str
+
+
+class AgentMessageRequest(BaseModel):
     input: str
     thread_id: Optional[str] = None
 
-class AgentResponse(BaseModel):
-    """Response model for agent interaction"""
-    thread_id: str
-    output: str
 
-#Configuration
-SYSTEM_PROMPT_CONFIG = SYSTEM_PROMPT  # Save for reuse
+runtime: Optional[BaseRuntime] = None
+runtime_mode: str = "unknown"
+runtime_error: Optional[str] = None
 
 
-async def run_agent_conversation(user_input: str):
-    """
-    Run a conversation with the agent (creates agent fresh each time).
-    Returns (thread_id, output_text).
-    """
-    # Load configuration
-    project_endpoint = os.getenv('FOUNDRY_PROJECT_ENDPOINT')
-    model_deployment_name = os.getenv('FOUNDRY_MODEL_DEPLOYMENT_NAME')
-    
+def _get_foundry_config() -> tuple[str, str, Optional[str], str, Optional[str], str]:
+    project_endpoint = os.getenv("FOUNDRY_PROJECT_ENDPOINT")
+    model_deployment_name = os.getenv("FOUNDRY_MODEL_DEPLOYMENT_NAME")
+    api_key = os.getenv("FOUNDRY_API_KEY")
+    backend = os.getenv("AGENT_RUNTIME_BACKEND", "foundry")
+    foundry_agent_id = os.getenv("FOUNDRY_AGENT_ID")
+    foundry_state_file = os.getenv("FOUNDRY_AGENT_STATE_FILE", ".foundry-agent-state.json")
+
     if not project_endpoint or not model_deployment_name:
         raise HTTPException(
             status_code=500,
-            detail="Missing configuration: FOUNDRY_PROJECT_ENDPOINT and FOUNDRY_MODEL_DEPLOYMENT_NAME required"
+            detail="Missing configuration: FOUNDRY_PROJECT_ENDPOINT and FOUNDRY_MODEL_DEPLOYMENT_NAME required",
         )
-    
-    # Import tools
-    tools = [test_simple_tool, get_account_balances, get_transactions, execute_transfer, get_spending_insights]
-    
-    # Generate thread ID
-    thread_id = str(uuid.uuid4())
-    output = ""
-    
-    # Use Azure AD authentication (DefaultAzureCredential)
-    async with (
-        DefaultAzureCredential() as credential,
-        AzureAIClient(
-            project_endpoint=project_endpoint,
-            model_deployment_name=model_deployment_name,
-            credential=credential,
-        ).create_agent(
-            name="HomeBankingAgent",
-            instructions=SYSTEM_PROMPT_CONFIG,
-            tools=tools,
-        ) as agent,
-    ):
-        thread = agent.get_new_thread()
-        async for chunk in agent.run_stream(user_input, thread=thread):
-            if chunk.text:
-                output += chunk.text
-    
-    return thread_id, output
 
-
-@app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    try:
-        # Just check if environment is configured
-        project_endpoint = os.getenv('FOUNDRY_PROJECT_ENDPOINT')
-        model_deployment_name = os.getenv('FOUNDRY_MODEL_DEPLOYMENT_NAME')
-        
-        if project_endpoint and model_deployment_name:
-            return {"status": "healthy", "agent_ready": True}
-        else:
-            return {"status": "degraded", "error": "Missing configuration"}
-    except Exception as e:
-        return {"status": "degraded", "error": str(e)}
-
-
-@app.get("/test")
-async def test_agent_init():
-    """Test endpoint to diagnose agent initialization"""
-    try:
-        project_endpoint = os.getenv('FOUNDRY_PROJECT_ENDPOINT')
-        model_deployment_name = os.getenv('FOUNDRY_MODEL_DEPLOYMENT_NAME')
-        
-        tools = [test_simple_tool, get_account_balances, get_transactions, execute_transfer, get_spending_insights]
-        
-        # Use Azure AD authentication
-        async with (
-            DefaultAzureCredential() as credential,
-            AzureAIClient(
-                project_endpoint=project_endpoint,
-                model_deployment_name=model_deployment_name,
-                credential=credential,
-            ).create_agent(
-                name="TestAgent",
-                instructions="You are a test agent.",
-                tools=tools,
-            ) as agent,
-        ):
-            thread = agent.get_new_thread()
-            
-            # Try to run the agent
-            output = ""
-            async for chunk in agent.run_stream("Hello", thread=thread):
-                if chunk.text:
-                    output += chunk.text
-            
-            return {"status": "success", "message": "Agent ran successfully", "output": output}
-            
-    except Exception as e:
-        import traceback
-        return {"status": "error", "error": str(e), "traceback": traceback.format_exc()}
-
-
-@app.post("/agent/chat")
-async def chat(request: AgentRequest):
-    """
-    Chat with the banking agent (non-streaming).
-    
-    Args:
-        request: AgentRequest with input message and optional thread_id
-        
-    Returns:
-        AgentResponse with thread_id and output message
-    """
-    try:
-        thread_id, output = await run_agent_conversation(request.input)
-        
-        return AgentResponse(
-            thread_id=thread_id,
-            output=output
-        )
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Agent error: {str(e)}")
-
-
-@app.post("/agent/stream")
-async def stream_chat(request: AgentRequest):
-    """
-    Chat with the banking agent (streaming response).
-    
-    Args:
-        request: AgentRequest with input message and optional thread_id
-        
-    Returns:
-        StreamingResponse with server-sent events
-    """
-    # Load configuration
-    project_endpoint = os.getenv('FOUNDRY_PROJECT_ENDPOINT')
-    model_deployment_name = os.getenv('FOUNDRY_MODEL_DEPLOYMENT_NAME')
-    
-    if not project_endpoint or not model_deployment_name:
-        raise HTTPException(
-            status_code=500,
-            detail="Missing configuration"
-        )
-    
-    tools = [test_simple_tool, get_account_balances, get_transactions, execute_transfer, get_spending_insights]
-    thread_id = str(uuid.uuid4())
-    
-    async def event_generator():
-        """Generate server-sent events"""
-        try:
-            # Send thread ID first
-            yield f"data: {json.dumps({'type': 'thread_id', 'thread_id': thread_id})}\n\n"
-            
-            #Use Azure AD authentication
-            async with (
-                DefaultAzureCredential() as credential,
-                AzureAIClient(
-                    project_endpoint=project_endpoint,
-                    model_deployment_name=model_deployment_name,
-                    credential=credential,
-                ).create_agent(
-                    name="HomeBankingAgent",
-                    instructions=SYSTEM_PROMPT_CONFIG,
-                    tools=tools,
-                ) as agent,
-            ):
-                thread = agent.get_new_thread()
-                async for chunk in agent.run_stream(request.input, thread=thread):
-                    if chunk.text:
-                        # Send text chunk
-                        yield f"data: {json.dumps({'type': 'text', 'text': chunk.text})}\n\n"
-            
-            # Send completion event
-            yield f"data: {json.dumps({'type': 'done'})}\n\n"
-            
-        except Exception as e:
-            error_msg = str(e)
-            yield f"data: {json.dumps({'type': 'error', 'error': error_msg})}\n\n"
-    
-    return StreamingResponse(
-        event_generator(),
-        media_type="text/event-stream"
+    return (
+        project_endpoint,
+        model_deployment_name,
+        api_key,
+        backend,
+        foundry_agent_id,
+        foundry_state_file,
     )
+
+
+def _get_tools():
+    return [
+        get_account_balances,
+        get_transactions,
+        execute_transfer,
+        get_spending_insights,
+    ]
+
+
+async def _ensure_runtime() -> BaseRuntime:
+    global runtime, runtime_mode, runtime_error
+
+    if runtime is not None:
+        return runtime
+
+    (
+        project_endpoint,
+        model_deployment_name,
+        api_key,
+        backend,
+        foundry_agent_id,
+        foundry_state_file,
+    ) = _get_foundry_config()
+
+    runtime = await build_runtime(
+        project_endpoint=project_endpoint,
+        model_deployment_name=model_deployment_name,
+        api_key=api_key,
+        system_prompt=SYSTEM_PROMPT,
+        tools=_get_tools(),
+        preferred_backend=backend,
+        foundry_agent_id=foundry_agent_id,
+        foundry_state_file=foundry_state_file,
+    )
+    runtime_mode = runtime.__class__.__name__
+    runtime_error = None
+    return runtime
+
+
+@app.get("/agent/health")
+async def agent_health():
+    try:
+        _, _, _, backend, _, _ = _get_foundry_config()
+        active_agent_id = getattr(runtime, "agent_id", None) if runtime is not None else None
+        return {
+            "status": "healthy" if runtime is not None else "degraded",
+            "agent_ready": runtime is not None,
+            "runtime_mode": runtime_mode if runtime is not None else f"not-initialized ({backend})",
+            "backend_preference": backend,
+            "active_agent_id": active_agent_id,
+            "runtime_error": runtime_error,
+        }
+    except HTTPException as ex:
+        return {
+            "status": "degraded",
+            "agent_ready": False,
+            "runtime_mode": runtime_mode,
+            "backend_preference": "unknown",
+            "error": ex.detail,
+            "runtime_error": runtime_error,
+        }
+    except Exception as ex:
+        return {
+            "status": "degraded",
+            "agent_ready": False,
+            "runtime_mode": runtime_mode,
+            "backend_preference": "unknown",
+            "error": str(ex),
+            "runtime_error": runtime_error,
+        }
+
+
+@app.post("/agent/threads", response_model=CreateThreadResponse)
+async def create_thread():
+    try:
+        active_runtime = await _ensure_runtime()
+    except Exception as ex:
+        raise HTTPException(status_code=503, detail=f"Agent runtime unavailable: {str(ex)}")
+
+    thread_id = await active_runtime.create_thread()
+    return CreateThreadResponse(thread_id=thread_id)
+
+
+@app.post("/agent/messages")
+async def post_message(request: AgentMessageRequest):
+    try:
+        active_runtime = await _ensure_runtime()
+    except Exception as ex:
+        raise HTTPException(status_code=503, detail=f"Agent runtime unavailable: {str(ex)}")
+
+    thread_id = await active_runtime.get_or_create_thread(request.thread_id)
+
+    async def event_generator():
+        try:
+            yield f"data: {json.dumps({'type': 'thread', 'thread_id': thread_id})}\n\n"
+
+            async for text in active_runtime.stream_message(thread_id=thread_id, user_input=request.input):
+                yield f"data: {json.dumps({'type': 'text', 'text': text})}\n\n"
+
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        except Exception as ex:
+            yield f"data: {json.dumps({'type': 'error', 'error': str(ex)})}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 if __name__ == "__main__":
     import uvicorn
-    
-    port = int(os.getenv('AGENT_PORT', '8087'))
-    
+
+    port = int(os.getenv("AGENT_PORT", "8087"))
+
     print("=" * 50)
     print("🏦 Home Banking AI Agent Server")
     print("=" * 50)
     print(f"🚀 Starting server on http://127.0.0.1:{port}")
-    print(f"📡 Endpoints:")
-    print(f"   - POST /agent/chat      (non-streaming)")
-    print(f"   - POST /agent/stream    (streaming)")
-    print(f"   - GET  /health          (health check)")
+    print("📡 Endpoints:")
+    print("   - POST /agent/threads     (create session thread id)")
+    print("   - POST /agent/messages    (streaming SSE)")
+    print("   - GET  /agent/health      (health check)")
     print("=" * 50)
-    
+
     uvicorn.run(app, host="127.0.0.1", port=port)

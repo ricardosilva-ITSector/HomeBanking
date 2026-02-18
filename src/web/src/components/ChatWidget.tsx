@@ -7,7 +7,12 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { sendMessageToAgent, checkAgentHealth, AgentError } from "@/services/agentService";
+import {
+  sendMessageToAgent,
+  checkAgentHealth,
+  createAgentThread,
+  AgentError,
+} from "@/services/agentService";
 import type { AgentMessage } from "@/types/api";
 import { MessageCircle, Send, X, Loader2, AlertCircle } from "lucide-react";
 
@@ -18,7 +23,7 @@ export function ChatWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [agentAvailable, setAgentAvailable] = useState<boolean | null>(null);
-  const [threadId] = useState<string>(() => `thread-${Date.now()}`);
+  const [threadId, setThreadId] = useState<string | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -66,8 +71,15 @@ export function ChatWidget() {
       // Add empty assistant message that we'll update
       setMessages((prev) => [...prev, assistantMessage]);
 
+      // Ensure a thread exists before sending first message
+      let activeThreadId = threadId;
+      if (!activeThreadId) {
+        activeThreadId = await createAgentThread();
+        setThreadId(activeThreadId);
+      }
+
       // Stream the response
-      for await (const chunk of sendMessageToAgent(userMessage.content, threadId)) {
+      for await (const chunk of sendMessageToAgent(userMessage.content, activeThreadId, setThreadId)) {
         assistantContent += chunk;
         setMessages((prev) => {
           const newMessages = [...prev];

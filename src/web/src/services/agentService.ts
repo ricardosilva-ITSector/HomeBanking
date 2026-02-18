@@ -3,6 +3,10 @@
  * Handles API calls to the agent HTTP server.
  */
 
+interface CreateThreadResponse {
+  thread_id: string;
+}
+
 /**
  * Base URL for agent API requests.
  * Uses VITE_AGENT_URL environment variable or defaults to /agent-api.
@@ -23,6 +27,29 @@ export class AgentError extends Error {
 }
 
 /**
+ * Create a new agent thread.
+ * @returns Promise resolving to thread ID
+ */
+export async function createAgentThread(): Promise<string> {
+  const response = await fetch(`${AGENT_BASE_URL}/agent/threads`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new AgentError(
+      `Failed to create thread: ${response.statusText}`,
+      response.status
+    );
+  }
+
+  const data = (await response.json()) as CreateThreadResponse;
+  return data.thread_id;
+}
+
+/**
  * Send a message to the agent and get a streaming response.
  * @param message - User message text
  * @param threadId - Optional thread ID for conversation continuity
@@ -30,10 +57,11 @@ export class AgentError extends Error {
  */
 export async function* sendMessageToAgent(
   message: string,
-  threadId?: string
+  threadId?: string,
+  onThreadId?: (threadId: string) => void
 ): AsyncGenerator<string, void, unknown> {
   try {
-    const response = await fetch(`${AGENT_BASE_URL}/agent/stream`, {
+    const response = await fetch(`${AGENT_BASE_URL}/agent/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -75,24 +103,29 @@ export async function* sendMessageToAgent(
         for (const line of lines) {
           if (line.startsWith("data: ")) {
             const data = line.slice(6); // Remove "data: " prefix
-            
+            let event: any;
             try {
-              const event = JSON.parse(data);
-              
-              if (event.type === "text" && event.text) {
-                // Unescape the text
-                const text = event.text
-                  .replace(/\\n/g, "\n")
-                  .replace(/\\'/g, "'");
-                yield text;
-              } else if (event.type === "error") {
-                throw new AgentError(event.error || "Agent error");
-              }
-              // Ignore thread_id and done events
+              event = JSON.parse(data);
             } catch (e) {
-              // Skip invalid JSON
+              // Skip invalid JSON chunks
               console.warn("Failed to parse SSE data:", data, e);
+              continue;
             }
+
+            if (event.type === "text" && event.text) {
+              // Unescape the text
+              const text = event.text
+                .replace(/\\n/g, "\n")
+                .replace(/\\'/g, "'");
+              yield text;
+            } else if (event.type === "thread" && event.thread_id) {
+              if (onThreadId) {
+                onThreadId(event.thread_id);
+              }
+            } else if (event.type === "error") {
+              throw new AgentError(event.error || "Agent error");
+            }
+            // Ignore done events
           }
         }
       }
@@ -116,7 +149,7 @@ export async function* sendMessageToAgent(
 export async function checkAgentHealth(): Promise<boolean> {
   try {
     // Try to connect to the agent server health endpoint
-    const response = await fetch(`${AGENT_BASE_URL}/health`, {
+    const response = await fetch(`${AGENT_BASE_URL}/agent/health`, {
       method: "GET",
       signal: AbortSignal.timeout(3000),
     });

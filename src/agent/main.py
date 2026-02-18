@@ -177,80 +177,19 @@ async def _run_cli_conversation(agent):
 
 
 async def run_server_mode(port: int = 8087):
-    """Run the agent as an HTTP server for web app integration."""
+    """Run the authoritative HTTP API server for web app integration."""
     print("🏦 Home Banking Assistant - Server Mode")
     print("=" * 50)
     print(f"Starting server on http://127.0.0.1:{port}")
-    print("Initializing agent...")
-    
-    # Get configuration from environment
-    project_endpoint = os.getenv("FOUNDRY_PROJECT_ENDPOINT")
-    model_deployment_name = os.getenv("FOUNDRY_MODEL_DEPLOYMENT_NAME")
-    api_key = os.getenv("FOUNDRY_API_KEY")
-    
-    if not project_endpoint or not model_deployment_name:
-        print("❌ Error: Missing configuration!")
-        print("Please set FOUNDRY_PROJECT_ENDPOINT and FOUNDRY_MODEL_DEPLOYMENT_NAME in .env file")
-        return
-    
-    if "placeholder" in project_endpoint.lower() or (api_key and "your-api-key" in api_key.lower()):
-        print("⚠️  Warning: Using placeholder configuration!")
-        print("Server will start but agent calls will fail until you configure real credentials")
-    
+    print("Using server.py runtime (authoritative HTTP surface)")
+
     try:
-        from azure.ai.agentserver.agentframework import from_agent_framework
-        
-        # Import tools
-        try:
-            from tools import get_account_balances, get_transactions, execute_transfer, get_spending_insights
-            tools = [get_account_balances, get_transactions, execute_transfer, get_spending_insights]
-            print(f"✅ Loaded {len(tools)} tools")
-        except ImportError as e:
-            print(f"⚠️  Warning: Could not load tools: {e}")
-            print("Running with basic agent (no API integration)")
-            tools = []
-        
-        # Use API key if provided, otherwise use DefaultAzureCredential
-        if api_key:
-            print("🔑 Using API key authentication")
-            client = AzureAIClient(
-                project_endpoint=project_endpoint,
-                model_deployment_name=model_deployment_name,
-                credential=AzureKeyCredential(api_key),
-            )
-            async with client.create_agent(
-                name="HomeBankingAgent",
-                instructions=SYSTEM_PROMPT,
-                tools=tools,
-            ) as agent:
-                print("✅ Agent initialized successfully")
-                print(f"🚀 Server running at http://127.0.0.1:{port}")
-                print("Press Ctrl+C to stop")
-                print("=" * 50)
-                
-                # Start the HTTP server
-                await from_agent_framework(agent).run_async(port=port)
-        else:
-            print("🔐 Using Azure credential authentication")
-            async with DefaultAzureCredential() as credential:
-                client = AzureAIClient(
-                    project_endpoint=project_endpoint,
-                    model_deployment_name=model_deployment_name,
-                    credential=credential,
-                )
-                async with client.create_agent(
-                    name="HomeBankingAgent",
-                    instructions=SYSTEM_PROMPT,
-                    tools=tools,
-                ) as agent:
-                    print("✅ Agent initialized successfully")
-                    print(f"🚀 Server running at http://127.0.0.1:{port}")
-                    print("Press Ctrl+C to stop")
-                    print("=" * 50)
-                    
-                    # Start the HTTP server
-                    await from_agent_framework(agent).run_async(port=port)
-    
+        import uvicorn
+        from server import app
+
+        config = uvicorn.Config(app, host="127.0.0.1", port=port, log_level="info")
+        server = uvicorn.Server(config)
+        await server.serve()
     except KeyboardInterrupt:
         print("\n👋 Server stopped")
     except Exception as e:

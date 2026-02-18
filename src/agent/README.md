@@ -33,8 +33,8 @@ Create a `.env` file (copy from `.env.example`):
 
 ```env
 # Azure AI Foundry Configuration
-FOUNDRY_PROJECT_ENDPOINT=https://your-foundry-resource.openai.azure.com/anthropic/v1/messages
-FOUNDRY_MODEL_DEPLOYMENT_NAME=claude-sonnet-4-5
+FOUNDRY_PROJECT_ENDPOINT=https://your-foundry-resource.services.ai.azure.com/api/projects/your-project-name
+FOUNDRY_MODEL_DEPLOYMENT_NAME=your-model-deployment-name
 FOUNDRY_API_KEY=your-api-key-here
 
 # Backend API
@@ -42,6 +42,9 @@ BACKEND_API_URL=http://localhost:5091
 
 # Agent Server
 AGENT_PORT=8087
+
+# Optional persistent Foundry agent id (migration phase)
+FOUNDRY_AGENT_ID=
 
 # Logging
 LOG_LEVEL=DEBUG
@@ -60,15 +63,17 @@ LOG_LEVEL=DEBUG
 python main.py
 ```
 
-**Server Mode** (for web app integration):
+**Server Mode** (authoritative HTTP runtime for web app integration):
 ```bash
-python main.py --server
+python server.py
 ```
 
 **Custom Port**:
 ```bash
-python main.py --server --port 8088
+AGENT_PORT=8088 python server.py
 ```
+
+`python main.py --server` remains available and delegates to `server.py`.
 
 ## 💬 Usage Examples
 
@@ -101,15 +106,17 @@ Agent: ✅ Transfer completed successfully! [details...]
 
 ### HTTP API Mode
 
-When running in server mode, the agent exposes an HTTP endpoint for the React chat widget:
+When running in server mode, the agent exposes thread/message endpoints for the React chat widget:
 
 ```bash
-POST http://localhost:8087/agent/run
+POST http://localhost:8087/agent/threads
+POST http://localhost:8087/agent/messages
+GET  http://localhost:8087/agent/health
 Content-Type: application/json
 
 {
-  "message": "What are my account balances?",
-  "thread_id": "optional-session-id"
+  "input": "What are my account balances?",
+  "thread_id": "existing-thread-id"
 }
 ```
 
@@ -125,7 +132,7 @@ Response is streamed as Server-Sent Events (SSE).
          ▼
 ┌─────────────────┐
 │  Agent Server   │  (port 8087)
-│   main.py       │
+│   server.py     │
 └────────┬────────┘
          │
     ┌────┴────┐
@@ -168,7 +175,7 @@ See [TESTING.md](TESTING.md) for detailed testing documentation.
    - Press `F5`
    - Select "Debug Agent HTTP Server"
    - Agent Inspector will open automatically
-   - Set breakpoints in `main.py` or `tools.py`
+  - Set breakpoints in `server.py` or `tools.py`
 
 2. **CLI Mode**:
    - Press `F5`
@@ -188,7 +195,8 @@ The AI Toolkit extension provides an Agent Inspector for testing:
 
 ```
 src/agent/
-├── main.py              # Agent entry point (CLI & Server modes)
+├── main.py              # Agent CLI entrypoint (+ server delegator)
+├── server.py            # Authoritative HTTP runtime (threads/messages)
 ├── tools.py             # API integration tools (4 tools)
 ├── analysis.py          # Financial analysis functions
 ├── requirements.txt     # Python dependencies
