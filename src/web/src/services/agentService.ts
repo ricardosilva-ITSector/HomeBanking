@@ -5,9 +5,9 @@
 
 /**
  * Base URL for agent API requests.
- * Uses VITE_AGENT_URL environment variable or defaults to http://localhost:8087.
+ * Uses VITE_AGENT_URL environment variable or defaults to /agent-api.
  */
-const AGENT_BASE_URL = import.meta.env.VITE_AGENT_URL || "http://localhost:8087";
+const AGENT_BASE_URL = import.meta.env.VITE_AGENT_URL || "/agent-api";
 
 /**
  * Error class for agent-specific errors.

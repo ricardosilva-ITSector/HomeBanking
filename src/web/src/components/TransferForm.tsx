@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -166,37 +166,34 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
   }
 
   return (
-    <Card className="bg-slate-900 border-slate-800">
-      <CardHeader>
-        <CardTitle className="text-xl text-slate-100">Make a Transfer</CardTitle>
-      </CardHeader>
+    <Card className="border-0 bg-transparent shadow-none">
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Success Message */}
           {successMessage && (
             <div
-              className="bg-green-950 border border-green-800 rounded-lg p-4"
+              className="bg-green-50 border border-green-200 rounded-lg p-4"
               role="alert"
               aria-live="polite"
             >
-              <p className="text-green-300">{successMessage}</p>
+              <p className="text-green-700">{successMessage}</p>
             </div>
           )}
 
           {/* General Error Message */}
           {errors.general && (
             <div
-              className="bg-red-950 border border-red-800 rounded-lg p-4"
+              className="bg-red-50 border border-red-200 rounded-lg p-4"
               role="alert"
               aria-live="assertive"
             >
-              <p className="text-red-300">{errors.general}</p>
+              <p className="text-red-700">{errors.general}</p>
             </div>
           )}
 
           {/* From Account */}
           <div className="space-y-2">
-            <Label htmlFor="fromAccount" className="text-slate-200">
+            <Label htmlFor="fromAccount" className="text-slate-700">
               From Account
             </Label>
             <Select
@@ -210,18 +207,18 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
             >
               <SelectTrigger
                 id="fromAccount"
-                className="bg-slate-950 border-slate-700 text-slate-100"
+                className="border-slate-300 bg-white text-slate-900"
                 aria-invalid={!!errors.fromAccountId}
                 aria-describedby={errors.fromAccountId ? 'fromAccount-error' : undefined}
               >
                 <SelectValue placeholder="Select source account" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-slate-700">
+              <SelectContent className="border-slate-200 bg-white">
                 {accounts.map((account) => (
                   <SelectItem
                     key={account.id}
                     value={account.id}
-                    className="text-slate-100 focus:bg-slate-800 focus:text-slate-100"
+                    className="text-slate-900 focus:bg-slate-100 focus:text-slate-900"
                   >
                     {account.accountName} - {maskAccountNumber(account.accountNumber)}
                   </SelectItem>
@@ -237,7 +234,7 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
 
           {/* To Account */}
           <div className="space-y-2">
-            <Label htmlFor="toAccount" className="text-slate-200">
+            <Label htmlFor="toAccount" className="text-slate-700">
               To Account
             </Label>
             <Select
@@ -251,19 +248,19 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
             >
               <SelectTrigger
                 id="toAccount"
-                className="bg-slate-950 border-slate-700 text-slate-100"
+                className="border-slate-300 bg-white text-slate-900"
                 aria-invalid={!!errors.toAccountId}
                 aria-describedby={errors.toAccountId ? 'toAccount-error' : undefined}
               >
                 <SelectValue placeholder="Select destination account" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-slate-700">
+              <SelectContent className="border-slate-200 bg-white">
                 {accounts.map((account) => (
                   <SelectItem
                     key={account.id}
                     value={account.id}
                     disabled={account.id === fromAccountId}
-                    className="text-slate-100 focus:bg-slate-800 focus:text-slate-100 disabled:opacity-50"
+                    className="text-slate-900 focus:bg-slate-100 focus:text-slate-900 disabled:opacity-50"
                   >
                     {account.accountName} - {maskAccountNumber(account.accountNumber)}
                   </SelectItem>
@@ -279,11 +276,11 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
 
           {/* Amount */}
           <div className="space-y-2">
-            <Label htmlFor="amount" className="text-slate-200">
+            <Label htmlFor="amount" className="text-slate-700">
               Amount
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
                 $
               </span>
               <Input
@@ -293,7 +290,7 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
                 value={amount}
                 onChange={handleAmountChange}
                 placeholder="0.00"
-                className="bg-slate-950 border-slate-700 text-slate-100 pl-7"
+                className="border-slate-300 bg-white pl-7 text-slate-900"
                 aria-invalid={!!errors.amount}
                 aria-describedby={errors.amount ? 'amount-error' : undefined}
               />
@@ -307,15 +304,15 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-slate-200">
-              Description <span className="text-slate-500">(Optional)</span>
+            <Label htmlFor="description" className="text-slate-700">
+              Description <span className="text-slate-400">(Optional)</span>
             </Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter transfer description"
-              className="bg-slate-950 border-slate-700 text-slate-100 resize-none"
+              className="resize-none border-slate-300 bg-white text-slate-900"
               rows={3}
               maxLength={500}
             />
@@ -325,7 +322,7 @@ export function TransferForm({ accounts, onTransferSuccess }: TransferFormProps)
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white disabled:bg-slate-700 disabled:text-slate-400"
+            className="w-full bg-red-600 text-white hover:bg-red-700 disabled:bg-slate-300 disabled:text-slate-500"
           >
             {isSubmitting ? 'Processing...' : 'Transfer'}
           </Button>

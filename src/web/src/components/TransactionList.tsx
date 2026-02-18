@@ -133,7 +133,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-400">Loading transactions...</p>
+        <p className="text-slate-500">Loading transactions...</p>
       </div>
     );
   }
@@ -141,8 +141,8 @@ export function TransactionList({ accountId }: TransactionListProps) {
   // Error state
   if (error) {
     return (
-      <div className="bg-red-950 border border-red-800 rounded-lg p-4">
-        <p className="text-red-300">Error: {error}</p>
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <p className="text-red-700">Error: {error}</p>
       </div>
     );
   }
@@ -151,7 +151,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
   if (transactions.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-400">No transactions found</p>
+        <p className="text-slate-500">No transactions found</p>
       </div>
     );
   }
@@ -161,11 +161,11 @@ export function TransactionList({ accountId }: TransactionListProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-slate-300">Date</TableHead>
-            <TableHead className="text-slate-300">Description</TableHead>
-            <TableHead className="text-slate-300">Category</TableHead>
-            <TableHead className="text-right text-slate-300">Amount</TableHead>
-            <TableHead className="text-right text-slate-300">
+            <TableHead className="text-slate-600">Date</TableHead>
+            <TableHead className="text-slate-600">Description</TableHead>
+            <TableHead className="text-slate-600">Category</TableHead>
+            <TableHead className="text-right text-slate-600">Amount</TableHead>
+            <TableHead className="text-right text-slate-600">
               Balance After
             </TableHead>
           </TableRow>
@@ -179,10 +179,10 @@ export function TransactionList({ accountId }: TransactionListProps) {
 
             return (
               <TableRow key={transaction.id}>
-                <TableCell className="text-slate-400">
+                <TableCell className="text-slate-500">
                   {formatDate(transaction.date)}
                 </TableCell>
-                <TableCell className="text-slate-200">
+                <TableCell className="text-slate-800">
                   {transaction.description}
                 </TableCell>
                 <TableCell>
@@ -197,7 +197,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
                   {amountPrefix}
                   {formatCurrency(Math.abs(transaction.amount))}
                 </TableCell>
-                <TableCell className="text-right text-slate-300">
+                <TableCell className="text-right text-slate-700">
                   {formatCurrency(transaction.balanceAfter)}
                 </TableCell>
               </TableRow>

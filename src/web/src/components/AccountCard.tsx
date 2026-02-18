@@ -40,25 +40,29 @@ function getAccountTypeBadgeVariant(type: string): 'default' | 'secondary' {
 
 export function AccountCard({ account }: AccountCardProps) {
   return (
-    <Card className="bg-slate-900 border-slate-800 hover:border-slate-700 transition-colors">
+    <Card className="border-slate-200 bg-white transition-colors hover:border-red-300">
       <CardHeader>
         <div className="flex items-start justify-between">
-          <CardTitle className="text-xl text-slate-100">
+          <CardTitle className="text-xl text-slate-900">
             {account.accountName}
           </CardTitle>
           <Badge
             variant={getAccountTypeBadgeVariant(account.type)}
-            className="ml-2"
+            className={`ml-2 ${
+              account.type === 'Checking'
+                ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            }`}
           >
             {account.type}
           </Badge>
         </div>
-        <p className="text-sm text-slate-400 mt-2">
+        <p className="mt-2 text-sm text-slate-500">
           {maskAccountNumber(account.accountNumber)}
         </p>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold text-slate-100">
+        <div className="text-3xl font-bold text-slate-900">
           {formatCurrency(account.balance, account.currency)}
         </div>
       </CardContent>
