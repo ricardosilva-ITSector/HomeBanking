@@ -3,6 +3,7 @@ import { Header } from '@/components/Header'
 import { AccountCard } from '@/components/AccountCard'
 import { TransactionList } from '@/components/TransactionList'
 import { TransferForm } from '@/components/TransferForm'
+import { ChatWidget } from '@/components/ChatWidget'
 import { getAccounts } from '@/services/api'
 import type { Account } from '@/types/api'
 import './App.css'
@@ -81,6 +82,9 @@ function App() {
           </div>
         </div>
       </main>
+
+      {/* AI Chat Widget */}
+      <ChatWidget />
     </div>
   )
 }

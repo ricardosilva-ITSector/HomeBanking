@@ -182,3 +182,27 @@ Icon
 # Keep important empty directories
 !.github/workflows/.gitkeep
 !docs/.gitkeep
+
+###################
+# Python / Agent
+###################
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment variables (already above but ensuring)
+.env

@@ -49,6 +49,29 @@ export interface PaginatedTransactionsResponse {
 }
 
 /**
+ * Agent message types.
+ */
+export type AgentMessageRole = "user" | "assistant" | "system";
+
+/**
+ * Agent message model.
+ */
+export interface AgentMessage {
+  id: string;
+  role: AgentMessageRole;
+  content: string;
+  timestamp: Date;
+}
+
+/**
+ * Agent response from the server.
+ */
+export interface AgentResponse {
+  text: string;
+  thread_id?: string;
+}
+
+/**
  * Request DTO for creating a transfer between accounts.
  */
 export interface TransferRequest {
