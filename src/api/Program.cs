@@ -31,7 +31,12 @@ builder.Services.AddDbContext<HomeBankingDbContext>(options =>
 builder.Services.AddScoped<ITransferService, TransferService>();
 
 // Add services to the container
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Serialize enums as strings instead of numbers
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 
 // Configure OpenAPI with metadata
